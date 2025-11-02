@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ziyara — Login</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg1:#0c0615;
+  --bg2:#1a1028;
+  --accent:#7c3aed;
+  --accent-2:#a078ff;
+  --text:#f4f2ff;
+  --muted:#cfc6e6cc;
+  --border:rgba(255,255,255,0.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{
+  height:100%;
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));
+  color:var(--text);
+  overflow:hidden;
+}
+
+/* Background blur overlay */
+.bg-overlay{
+  position:fixed;inset:0;
+  background:radial-gradient(circle at top left,rgba(124,58,237,0.25),transparent 60%),
+             radial-gradient(circle at bottom right,rgba(160,120,255,0.2),transparent 60%);
+  z-index:-1;
+  backdrop-filter:blur(20px);
+}
+
+/* Auth Container */
+.auth-container{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:380px;
+  min-height:540px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  perspective:1200px;
+}
+
+/* Card */
+.card{
+  position:absolute;
+  width:100%;
+  padding:50px 30px 40px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid var(--border);
+  backdrop-filter:blur(12px);
+  box-shadow:0 10px 40px rgba(0,0,0,0.5);
+  opacity:0;
+  transform:translateY(40px) scale(0.96);
+  transition:all .7s cubic-bezier(.25,1,.5,1);
+}
+.card.active{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  z-index:2;
+}
+
+/* Logo */
+.logo-container{
+  width:90px;height:90px;
+  border-radius:50%;
+  margin:0 auto 10px;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at top,var(--accent-2),var(--accent));
+  box-shadow:0 0 25px rgba(124,58,237,0.6);
+}
+.logo-container img{
+  width:70%;height:70%;border-radius:50%;
+}
+
+/* Titles */
+h1{
+  text-align:center;
+  margin-bottom:20px;
+  font-size:1.6rem;
+  font-weight:600;
+  color:var(--accent-2);
+  letter-spacing:0.5px;
+}
+
+/* Inputs */
+.input-group{margin-bottom:18px;}
+label{
+  font-size:0.9rem;
+  color:var(--muted);
+  display:block;
+  margin-bottom:6px;
+}
+input[type="text"],input[type="email"],input[type="password"]{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.05);
+  color:#fff;
+  outline:none;
+  transition:.3s ease;
+  font-size:0.95rem;
+}
+input:focus{
+  border-color:var(--accent-2);
+  box-shadow:0 0 10px rgba(124,58,237,0.6);
+}
+
+/* Buttons */
+.auth-btn{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#fff;
+  font-weight:600;
+  font-size:1rem;
+  cursor:pointer;
+  transition:all .3s ease;
+}
+.auth-btn:hover{
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 0 25px rgba(124,58,237,0.5);
+}
+
+.toggle-description{
+  text-align:center;
+  margin-top:16px;
+  font-size:0.85rem;
+  color:var(--muted);
+}
+.toggle-btn{
+  display:block;
+  width:100%;
+  text-align:center;
+  padding:10px 0;
+  margin-top:8px;
+  font-size:0.9rem;
+  border:1px solid var(--accent-2);
+  background:transparent;
+  border-radius:10px;
+  color:var(--accent-2);
+  cursor:pointer;
+  transition:.3s;
+}
+.toggle-btn:hover{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  color:#fff;
+  box-shadow:0 0 15px rgba(124,58,237,0.4);
+  transform:scale(1.03);
+}
+
+/* Smooth transitions between cards */
+.card.hide-left{transform:translateX(-120%) rotateY(20deg);opacity:0;}
+.card.hide-right{transform:translateX(120%) rotateY(-20deg);opacity:0;}
+</style>
+</head>
+<body>
+
+<div class="bg-overlay"></div>
+
+<div class="auth-container">
+
+  <!-- LOGIN -->
+  <div class="card active" id="card-login">
+    <div class="logo-container"><img src="Z.png" alt="Ziyara"></div>
+    <h1>Sign in to Ziyara</h1>
+    <div class="input-group"><label>Email</label><input type="email" id="login-email" placeholder="Email"></div>
+    <div class="input-group"><label>Password</label><input type="password" id="login-password" placeholder="Password"></div>
+    <button class="auth-btn" onclick="loginUser()">Login</button>
+    <div class="toggle-description">Don't have an account?</div>
+    <button class="toggle-btn" onclick="switchCard('signup')">Sign Up</button>
+    <div class="toggle-description">Forgot your password?</div>
+    <button class="toggle-btn" onclick="switchCard('forgot')">Forgot Password</button>
+  </div>
+
+  <!-- SIGNUP -->
+  <div class="card" id="card-signup">
+    <div class="logo-container"><img src="Z.png" alt="Ziyara"></div>
+    <h1>Create your Ziyara ID</h1>
+    <div class="input-group"><label>Name</label><input type="text" id="signup-name" placeholder="Full Name"></div>
+    <div class="input-group"><label>Email</label><input type="email" id="signup-email" placeholder="Email"></div>
+    <div class="input-group"><label>Password</label><input type="password" id="signup-password" placeholder="Password"></div>
+    <button class="auth-btn" onclick="registerUser()">Create Account</button>
+    <div class="toggle-description">Already have an account?</div>
+    <button class="toggle-btn" onclick="switchCard('login')">Sign In</button>
+  </div>
+
+  <!-- FORGOT -->
+  <div class="card" id="card-forgot">
+    <div class="logo-container"><img src="Z.png" alt="Ziyara"></div>
+    <h1>Reset Password</h1>
+    <div class="input-group"><label>Email</label><input type="email" id="forgot-email" placeholder="Enter your registered email"></div>
+    <div class="input-group"><label>New Password</label><input type="password" id="forgot-password" placeholder="Enter new password"></div>
+    <button class="auth-btn" onclick="resetPassword()">Update Password</button>
+    <div class="toggle-description">Remembered your password?</div>
+    <button class="toggle-btn" onclick="switchCard('login')">Back to Sign In</button>
+  </div>
+
+</div>
+
+<script>
+const cards = {
+  login: document.getElementById('card-login'),
+  signup: document.getElementById('card-signup'),
+  forgot: document.getElementById('card-forgot')
+};
+let current = 'login';
+
+function switchCard(target){
+  if(target === current) return;
+  const out = cards[current];
+  const incoming = cards[target];
+  out.classList.remove('active');
+  out.classList.add(target==='signup' ? 'hide-left' : 'hide-right');
+  setTimeout(()=>{out.classList.remove('hide-left','hide-right');},600);
+  incoming.classList.add('active');
+  current = target;
+}
+
+/************** USERS **************/
+const presetUsers = [
+  { name:'Super Admin', email:'admin@ziyara.com', password:'admin123', role:'admin', redirect:'super.html' },
+  { name:'Admin Two', email:'admin2@cloud.com', password:'admin123', role:'admin', redirect:'super.html' },
+  { name:'owner', email:'owner@ziyara.com', password:'owner123', role:'user', redirect:'owner.html' },
+  { name:'Mukesh', email:'mukesh@ziyara.com', password:'user123', role:'user', redirect:'use.html' }
+];
+let storedUsers = JSON.parse(localStorage.getItem('users')) || [];
+presetUsers.forEach(p => {
+  if (!storedUsers.some(u => u.email.toLowerCase() === p.email.toLowerCase())) storedUsers.push(p);
+});
+localStorage.setItem('users', JSON.stringify(storedUsers));
+
+function loginUser(){
+  const email=document.getElementById('login-email').value.trim().toLowerCase();
+  const pass=document.getElementById('login-password').value.trim();
+  const users=JSON.parse(localStorage.getItem('users'))||[];
+  const user=users.find(u=>u.email.toLowerCase()===email && u.password===pass);
+  if(!user){alert('Invalid credentials ❌');return;}
+  localStorage.setItem('currentUser',JSON.stringify(user));
+  window.location.href=user.redirect||'use.html';
+}
+function registerUser(){
+  const name=document.getElementById('signup-name').value.trim();
+  const email=document.getElementById('signup-email').value.trim().toLowerCase();
+  const pass=document.getElementById('signup-password').value.trim();
+  if(!name||!email||!pass){alert('Fill all fields');return;}
+  const users=JSON.parse(localStorage.getItem('users'))||[];
+  if(users.some(u=>u.email===email)){alert('User exists');return;}
+  users.push({name,email,password:pass,role:'user',redirect:'use.html'});
+  localStorage.setItem('users',JSON.stringify(users));
+  alert('Account created ✅');
+  switchCard('login');
+}
+function resetPassword(){
+  const email=document.getElementById('forgot-email').value.trim().toLowerCase();
+  const newPass=document.getElementById('forgot-password').value.trim();
+  const users=JSON.parse(localStorage.getItem('users'))||[];
+  const idx=users.findIndex(u=>u.email===email);
+  if(idx===-1){alert('Email not found');return;}
+  users[idx].password=newPass;
+  localStorage.setItem('users',JSON.stringify(users));
+  alert('Password updated ✅');
+  switchCard('login');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ziyara — Services + In-Page Demo</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+<style>
+:root{
+  --purple:#8B5CF6; --lpurple:#A78BFA;
+  --bg:#0f0b1e; --panel:#141129;
+  --glass:rgba(255,255,255,.06); --border:rgba(255,255,255,.10);
+  --text:#fff; --muted:#d9d9e1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Poppins,system-ui,sans-serif;overflow-x:hidden}
+
+/* page fade */
+.page{transition:opacity .45s ease, transform .45s ease}
+.page--hidden{opacity:0;pointer-events:none;transform:translateY(10px)}
+
+/* HERO */
+.hero{position:relative;height:62vh;min-height:440px;background:url('banner.png') center/cover no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 1rem}
+.hero-content{max-width:900px;padding:2rem}
+.hero h1{font-size:clamp(1.9rem,4vw,2.8rem);font-weight:700;margin-bottom:.6rem}
+.hero p{max-width:740px;margin:0 auto;font-size:1.05rem;opacity:.95}
+.cta-row{margin-top:1.6rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{
+  padding:1.08rem 2.3rem;border-radius:56px;border:1px solid rgba(255,255,255,.38);
+  background:rgba(255,255,255,.14);color:#fff;backdrop-filter:blur(10px);
+  font-weight:700;font-size:1.06rem;cursor:pointer;transition:.28s
+}
+.btn:hover{background:linear-gradient(135deg,var(--purple),var(--lpurple));border-color:transparent;box-shadow:0 0 26px rgba(139,92,246,.55)}
+.btn--ghost{background:rgba(255,255,255,.10)}
+
+/* FOCUS 3×3 */
+.focus{padding:5rem 8%;background:#120f22}
+.focus h2{text-align:center;font-size:2.2rem;margin-bottom:.6rem}
+.focus>p{max-width:760px;text-align:center;margin:0 auto 2rem;color:#cfcfe5;font-weight:300}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:1.6rem;text-align:center;transition:.25s}
+.card:hover{transform:translateY(-6px);box-shadow:0 10px 26px rgba(0,0,0,.32)}
+.card i{font-size:1.7rem;color:var(--lpurple);margin-bottom:.8rem;display:block}
+.card h3{margin:.1rem 0 .45rem;font-size:1.12rem;color:var(--lpurple);font-weight:700}
+.card p{color:#ddd;line-height:1.6;font-size:.95rem}
+
+/* DEMO OVERLAY */
+.demo{position:fixed;inset:0;background:rgba(10,8,20,.55);backdrop-filter:blur(8px);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .45s ease;z-index:60}
+.demo--visible{opacity:1;pointer-events:auto}
+.demo__shell{width:min(1200px,94vw);height:min(86vh,900px);margin:auto;background:rgba(18,16,38,.78);border:1px solid rgba(255,255,255,.12);border-radius:22px;box-shadow:0 20px 60px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
+.demo__topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0))}
+.tabs{display:flex;gap:.6rem;flex-wrap:wrap}
+.tab{padding:.62rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);font-weight:700;cursor:pointer;transition:.25s}
+.tab[aria-selected="true"]{background:linear-gradient(135deg,var(--purple),var(--lpurple));border-color:transparent;box-shadow:0 0 18px rgba(139,92,246,.45)}
+.btn-small{padding:.6rem 1rem;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);cursor:pointer;font-weight:700}
+.btn-small:hover{background:linear-gradient(135deg,var(--purple),var(--lpurple));border-color:transparent}
+.demo__content{display:grid;grid-template-columns:290px 1fr;gap:16px;padding:16px;height:100%}
+@media(max-width:980px){.demo__content{grid-template-columns:1fr}}
+
+/* Sidebar (dynamic) */
+.demo__side{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:14px;overflow:auto}
+.sidebar-view{display:none;animation:fade .32s ease}
+.sidebar-view--active{display:block}
+.side__title{font-weight:800;margin:2px 0 10px}
+.stat{display:grid;grid-template-columns:1fr auto;gap:.3rem;padding:.8rem;border:1px solid var(--border);border-radius:10px;margin-top:.6rem;background:rgba(255,255,255,.04)}
+.muted{color:#c9c9d6;font-size:.9rem}
+
+/* Main area */
+.demo__main{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:16px;overflow:auto}
+.view{display:none;animation:fade .32s ease}
+.view--active{display:block}
+.panel{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:.9rem}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.8rem;margin-bottom:1rem}
+.kpi{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:1rem}
+.kpi .num{font-size:1.3rem;font-weight:800}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:.55rem}
+.list li{display:flex;justify-content:space-between;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:.6rem .7rem}
+.table{width:100%;border-collapse:separate;border-spacing:0 8px}
+.table thead th{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:#c9c9d6;text-align:left;padding:0 .6rem}
+.table tbody tr{background:rgba(255,255,255,.05)}
+.table td{padding:.7rem .6rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.chip{padding:.25rem .55rem;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);font-size:.78rem}
+
+/* Charts */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:170px;margin-top:.8rem}
+.bar{width:14%;border-radius:6px 6px 0 0;background:linear-gradient(135deg,var(--purple),var(--lpurple));animation:grow 1s ease forwards}
+@keyframes grow{from{height:0}to{height:var(--h)}}
+.line-chart{position:relative;height:160px;margin-top:1rem;border-left:1px solid var(--border);border-bottom:1px solid var(--border)}
+.line{stroke:url(#grad);stroke-width:2.2;fill:none;stroke-linecap:round;animation:draw 1.4s ease forwards}
+@keyframes draw{from{stroke-dasharray:0 600}to{stroke-dasharray:600 0}}
+
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ===== Service Request Modal ===== */
+.form-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,8,20,.6);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+  z-index: 100;
+}
+.form-modal.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.form-container {
+  width: min(420px, 90%);
+  background: rgba(18,16,38,.85);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,.4);
+}
+.form-container h2 {
+  color: var(--lpurple);
+  font-weight: 700;
+  margin-bottom: .5rem;
+}
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.form-container input,
+.form-container textarea {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 12px;
+  padding: .8rem 1rem;
+  color: #fff;
+  font-size: .95rem;
+  outline: none;
+}
+.form-container input:focus,
+.form-container textarea:focus {
+  border-color: var(--lpurple);
+  box-shadow: 0 0 10px rgba(139,92,246,.4);
+}
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: .5rem;
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- ===== Service Page ===== -->
+<main id="servicePage" class="page">
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Smart, Secure & Seamless Visitor Management</h1>
+      <p>Experience how Ziyara brings centralized visibility, AI insights, and fast check-ins into a single elegant dashboard.</p>
+      <div class="cta-row">
+        <button id="btnGetService" class="btn">Request Service</button>
+        <button id="btnDemo" class="btn btn--ghost">Service Demo</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="focus">
+    <h2>Our Focus</h2>
+    <p>We don’t just manage visitors — we deliver intelligence, predictability, and control.</p>
+    <div class="grid">
+      <div class="card"><i class="fa-solid fa-chart-line"></i><h3>Smart Insights & Analytics</h3><p>Turn visitor data into actionable intelligence.</p></div>
+      <div class="card"><i class="fa-solid fa-brain"></i><h3>Predictive Management</h3><p>Forecast busy windows and align staffing.</p></div>
+      <div class="card"><i class="fa-solid fa-handshake"></i><h3>Seamless Experience</h3><p>Fast approvals and smooth check-ins.</p></div>
+      <div class="card"><i class="fa-solid fa-bell"></i><h3>Monitoring & Alerts</h3><p>Instant activity alerts for better control.</p></div>
+      <div class="card"><i class="fa-solid fa-network-wired"></i><h3>Centralized Visibility</h3><p>One dashboard for all branches.</p></div>
+      <div class="card"><i class="fa-solid fa-lightbulb"></i><h3>Organizational Intelligence</h3><p>Transform visitor logs into insights.</p></div>
+      <div class="card"><i class="fa-solid fa-shield-halved"></i><h3>Security & Compliance</h3><p>Role-based access and audit trails.</p></div>
+      <div class="card"><i class="fa-solid fa-plug"></i><h3>Integrations</h3><p>Connect HR and identity systems.</p></div>
+      <div class="card"><i class="fa-solid fa-cloud-arrow-up"></i><h3>Scalable Cloud</h3><p>Resilient, secure, and fast cloud setup.</p></div>
+    </div>
+  </section>
+</main>
+
+<!-- ===== Service Request Modal ===== -->
+<div id="serviceFormModal" class="form-modal">
+  <div class="form-container">
+    <h2>Request Ziyara Service</h2>
+    <p style="opacity:.85;margin-bottom:1rem;">Fill in your organization details to get started.</p>
+
+    <form id="serviceRequestForm">
+      <input type="text" name="org_name" placeholder="Organization Name" required>
+      <input type="text" name="contact_person" placeholder="Contact Person" required>
+      <input type="email" name="email" placeholder="Email Address" required>
+      <textarea name="message" rows="4" placeholder="Describe your service requirement..." required></textarea>
+
+      <div class="form-actions">
+        <button type="submit" class="btn">Submit Request</button>
+        <button type="button" id="closeForm" class="btn btn--ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===== In-Page Service Demo ===== -->
+<section id="demoLayer" class="demo" aria-hidden="true">
+  <div class="demo__shell" role="dialog" aria-modal="true" aria-label="Ziyara Service Demo">
+    <div class="demo__topbar">
+      <div class="tabs" role="tablist" aria-label="Demo Views">
+        <button class="tab" role="tab" aria-selected="true" data-view="user">User</button>
+        <button class="tab" role="tab" data-view="admin">Admin</button>
+        <button class="tab" role="tab" data-view="super">Super Admin</button>
+        <button class="tab" role="tab" data-view="ai">AI Analytics</button>
+        <button class="tab" role="tab" data-view="help">Help</button>
+      </div>
+      <div>
+        <button id="btnBack" class="btn-small">← Back</button>
+        <button id="btnCTA" class="btn-small">⚡ Get Service</button>
+      </div>
+    </div>
+
+    <div class="demo__content">
+      <!-- Dynamic Sidebar -->
+      <aside class="demo__side" aria-live="polite">
+        <!-- USER sidebar -->
+        <div id="sidebar-user" class="sidebar-view sidebar-view--active">
+          <div class="side__title">My Dashboard</div>
+          <div class="stat"><div class="muted">Next visit</div><div>Today 11:15</div><div class="muted">Fast-pass</div><div>Enabled</div></div>
+          <div class="stat"><div class="muted">Notifications</div><div>3</div><div class="muted">Events joined</div><div>12</div></div>
+        </div>
+        <!-- ADMIN sidebar -->
+        <div id="sidebar-admin" class="sidebar-view">
+          <div class="side__title">Admin Overview</div>
+          <div class="stat"><div class="muted">Active inside</div><div>57</div><div class="muted">Approvals</div><div>9</div></div>
+          <div class="stat"><div class="muted">Alerts</div><div>2</div><div class="muted">Events today</div><div>5</div></div>
+        </div>
+        <!-- SUPER ADMIN sidebar -->
+        <div id="sidebar-super" class="sidebar-view">
+          <div class="side__title">Organization Overview</div>
+          <div class="stat"><div class="muted">Sites</div><div>4</div><div class="muted">Visitors today</div><div>214</div></div>
+          <div class="stat"><div class="muted">Approvals pending</div><div>6</div><div class="muted">Anomalies</div><div>0</div></div>
+        </div>
+        <!-- AI sidebar -->
+        <div id="sidebar-ai" class="sidebar-view">
+          <div class="side__title">AI Summary</div>
+          <div class="stat"><div class="muted">Predicted Peak</div><div>11–12:30</div><div class="muted">Wait ↓</div><div>18%</div></div>
+          <div class="stat"><div class="muted">Top Segment</div><div>Vendors</div><div class="muted">Repeat</div><div>41%</div></div>
+        </div>
+        <!-- HELP sidebar -->
+        <div id="sidebar-help" class="sidebar-view">
+          <div class="side__title">Help Shortcuts</div>
+          <div class="stat"><div class="muted">Docs</div><div>Open</div><div class="muted">Support</div><div>Chat</div></div>
+          <div class="stat"><div class="muted">Feedback</div><div>Active</div><div class="muted">Status</div><div>OK</div></div>
+        </div>
+      </aside>
+
+      <!-- Main role views -->
+      <main class="demo__main">
+        <!-- USER -->
+        <section id="view-user" class="view view--active" role="tabpanel">
+          <div class="panel"><h3>User Dashboard</h3><p>See your events, notifications, and recommendations.</p></div>
+          <div class="kpi-row">
+            <div class="kpi"><div class="muted">Upcoming</div><div class="num">Today 11:15</div></div>
+            <div class="kpi"><div class="muted">Fast-pass</div><div class="num">Enabled</div></div>
+            <div class="kpi"><div class="muted">Notifications</div><div class="num">3</div></div>
+          </div>
+          <div class="panel">
+            <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-regular fa-calendar-check"></i> My Events</h4>
+            <ul class="list">
+              <li><span>Check-in with Neha — HQ 4F • 11:15</span><span class="chip">Scheduled</span></li>
+              <li><span>Vendor Meet — R&D 2F • Tue</span><span class="chip">Completed</span></li>
+              <li><span>Security Orientation — Plant • Fri</span><span class="chip">Booked</span></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-solid fa-compass"></i> Recommended</h4>
+            <ul class="list">
+              <li><span>Product Briefing (HQ)</span><span class="chip">Today 16:00</span></li>
+              <li><span>Safety Induction (Plant)</span><span class="chip">Tomorrow 10:00</span></li>
+              <li><span>R&D Showcase</span><span class="chip">Fri 11:30</span></li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- ADMIN -->
+        <section id="view-admin" class="view" role="tabpanel">
+          <div class="panel"><h3>Admin — Activity & Events</h3><p>Monitor live activity, approvals, and manage events.</p></div>
+          <div class="kpi-row">
+            <div class="kpi"><div class="muted">Live inside</div><div class="num">57</div></div>
+            <div class="kpi"><div class="muted">Approvals</div><div class="num">9</div></div>
+            <div class="kpi"><div class="muted">Alerts</div><div class="num">2</div></div>
+          </div>
+          <div class="panel">
+            <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-solid fa-list-check"></i> Live Activity</h4>
+            <table class="table">
+              <thead><tr><th>Time</th><th>Visitor</th><th>Branch</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>10:58</td><td>Arun M.</td><td>HQ</td><td><span class="chip">Check-in</span></td></tr>
+                <tr><td>10:54</td><td>Meera P.</td><td>Plant</td><td><span class="chip">Approved</span></td></tr>
+                <tr><td>10:49</td><td>AC Tech (Vendor)</td><td>HQ</td><td><span class="chip">Verify ID</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="panel">
+            <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-solid fa-calendar-plus"></i> Add Event (Mock)</h4>
+            <ul class="list">
+              <li><span>Title</span><span class="chip">Visitor Onboarding</span></li>
+              <li><span>Date</span><span class="chip">Today 16:00</span></li>
+              <li><span>Location</span><span class="chip">HQ — 3F</span></li>
+              <li><span>Capacity</span><span class="chip">25</span></li>
+            </ul>
+            <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap">
+              <button class="btn-small"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+              <button class="btn-small"><i class="fa-regular fa-paper-plane"></i> Publish</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SUPER ADMIN -->
+        <section id="view-super" class="view" role="tabpanel">
+          <div class="panel"><h3>Super Admin — Oversight</h3><p>Approve permissions, view traffic across sites.</p></div>
+          <div class="kpi-row">
+            <div class="kpi"><div class="muted">Sites</div><div class="num">4</div></div>
+            <div class="kpi"><div class="muted">Visitors today</div><div class="num">214</div></div>
+            <div class="kpi"><div class="muted">Anomalies</div><div class="num">0</div></div>
+          </div>
+          <div class="panel">
+            <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-solid fa-shield"></i> Approvals & Permissions</h4>
+            <ul class="list">
+              <li><span>Grant Admin — HQ (Priya R.)</span><span class="chip">Approve</span></li>
+              <li><span>Revoke Admin — Plant (Kiran V.)</span><span class="chip">Review</span></li>
+              <li><span>Org Access — Vendor “AC Tech”</span><span class="chip">Pending</span></li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-solid fa-chart-area"></i> Traffic Overview</h4>
+            <table class="table">
+              <thead><tr><th>Site</th><th>Active</th><th>Waiting</th><th>Avg. wait</th><th>Trend</th></tr></thead>
+              <tbody>
+                <tr><td>HQ — Bengaluru</td><td>22</td><td>4</td><td>2m</td><td><span class="chip">↗ steady</span></td></tr>
+                <tr><td>Plant — Pune</td><td>15</td><td>2</td><td>3m</td><td><span class="chip">↘ easing</span></td></tr>
+                <tr><td>R&D — Hyderabad</td><td>12</td><td>1</td><td>2m</td><td><span class="chip">→ normal</span></td></tr>
+                <tr><td>Branch — Chennai</td><td>8</td><td>2</td><td>4m</td><td><span class="chip">↗ busy</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- AI ANALYTICS -->
+        <section id="view-ai" class="view" role="tabpanel">
+          <div class="panel"><h3>AI Analytics — KPIs</h3>
+            <div class="kpi-row">
+              <div class="kpi"><div class="muted">Predicted peak</div><div class="num">11:00–12:30</div></div>
+              <div class="kpi"><div class="muted">Repeat visitors</div><div class="num">41%</div></div>
+              <div class="kpi"><div class="muted">Wait reduction</div><div class="num">-18%</div></div>
+            </div>
+          </div>
+          <div class="panel"><h4 style="color:var(--lpurple)">Traffic by Hour (Bar)</h4>
+            <div class="bar-chart">
+              <div class="bar" style="--h:45%"></div>
+              <div class="bar" style="--h:65%"></div>
+              <div class="bar" style="--h:55%"></div>
+              <div class="bar" style="--h:80%"></div>
+              <div class="bar" style="--h:40%"></div>
+              <div class="bar" style="--h:90%"></div>
+            </div>
+          </div>
+          <div class="panel"><h4 style="color:var(--lpurple)">Visitor Flow (Line)</h4>
+            <div class="line-chart">
+              <svg viewBox="0 0 300 160" preserveAspectRatio="none" width="100%" height="100%">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#A78BFA"/>
+                  </linearGradient>
+                </defs>
+                <path class="line" d="M10,120 L60,110 L110,95 L160,85 L210,105 L260,70 L290,80"/>
+              </svg>
+            </div>
+          </div>
+        </section>
+
+        <!-- HELP -->
+        <section id="view-help" class="view" role="tabpanel">
+          <div class="panel"><h3>Help — Chat & Stats</h3></div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:.9rem">
+            <!-- Chatbot mock -->
+            <div class="panel">
+              <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-solid fa-message"></i> Assistant</h4>
+              <div style="height:260px;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:.7rem;background:rgba(255,255,255,.03);display:flex;flex-direction:column;gap:.6rem">
+                <div><span class="chip">You</span> How do approvals work?</div>
+                <div><span class="chip">Ziyara</span> Admins approve visitors per site; Super Admins grant global permissions.</div>
+                <div><span class="chip">You</span> Generate a sample fast-pass.</div>
+                <div><span class="chip">Ziyara</span> QR issued, expires 14:30. Zones: HQ-G, HQ-4F.</div>
+              </div>
+              <div style="margin-top:.6rem;display:flex;gap:.5rem">
+                <input placeholder="Type a message…" style="flex:1;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:999px;padding:.6rem .9rem;color:#fff;outline:none"/>
+                <button class="btn-small"><i class="fa-regular fa-paper-plane"></i></button>
+              </div>
+            </div>
+            <!-- Quick stats -->
+            <div class="panel">
+              <h4 style="color:var(--lpurple);margin-bottom:.6rem"><i class="fa-solid fa-chart-simple"></i> Quick Stats</h4>
+              <div class="kpi-row">
+                <div class="kpi"><div class="muted">Avg. wait</div><div class="num">3m 12s</div></div>
+                <div class="kpi"><div class="muted">SLA approvals</div><div class="num">96%</div></div>
+                <div class="kpi"><div class="muted">Visitor NPS</div><div class="num">+62</div></div>
+              </div>
+              <ul class="list">
+                <li><span>Docs: Getting Started</span><span class="chip">Open</span></li>
+                <li><span>Policy: Data Retention</span><span class="chip">7 days</span></li>
+                <li><span>Zones: HQ-G, HQ-4F</span><span class="chip">Active</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<script>
+  
+/* ===============================
+   📧 EMAILJS FORM-BASED FLOW
+   =============================== */
+
+// Initialize EmailJS
+emailjs.init("pHf4VY7iCqzN-DF4u");
+
+// Elements
+const btnGetService = document.getElementById('btnGetService');
+const modal = document.getElementById('serviceFormModal');
+const closeForm = document.getElementById('closeForm');
+const serviceForm = document.getElementById('serviceRequestForm');
+
+// Show the modal when "Request Service" is clicked
+btnGetService.addEventListener('click', () => {
+  modal.classList.add('show');
+});
+
+// Close modal
+closeForm.addEventListener('click', () => {
+  modal.classList.remove('show');
+});
+
+// Form submission
+serviceForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(serviceForm);
+  const templateParams = {
+    org_name: formData.get('org_name'),
+    contact_person: formData.get('contact_person'),
+    email: formData.get('email'),
+    message: formData.get('message')
+  };
+
+  emailjs.send("service_40nob1a", "template_ey58ghs", templateParams)
+    .then(() => {
+      showToast("✅ Request sent successfully! We'll reach out soon.");
+      serviceForm.reset();
+      modal.classList.remove('show');
+    })
+    .catch((error) => {
+      console.error("EmailJS Error:", error);
+      showToast("⚠️ Failed to send request. Please try again later.");
+    });
+});
+
+
+// Toast notification for status messages
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  toast.style.position = "fixed";
+  toast.style.bottom = "25px";
+  toast.style.left = "50%";
+  toast.style.transform = "translateX(-50%)";
+  toast.style.background = "linear-gradient(135deg, #8B5CF6, #A78BFA)";
+  toast.style.color = "#fff";
+  toast.style.padding = "0.9rem 1.8rem";
+  toast.style.borderRadius = "50px";
+  toast.style.fontWeight = "600";
+  toast.style.boxShadow = "0 0 18px rgba(139,92,246,0.5)";
+  toast.style.zIndex = "9999";
+  toast.style.opacity = "0";
+  toast.style.transition = "opacity .4s ease";
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.style.opacity = "1", 100);
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 600);
+  }, 3000);
+}
+
+
+/* Elements */
+const servicePage=document.getElementById('servicePage');
+const demoLayer=document.getElementById('demoLayer');
+const btnDemo=document.getElementById('btnDemo');
+const btnBack=document.getElementById('btnBack');
+const btnCTA=document.getElementById('btnCTA');
+const tabs=[...document.querySelectorAll('.tab')];
+
+const views={
+  user:document.getElementById('view-user'),
+  admin:document.getElementById('view-admin'),
+  super:document.getElementById('view-super'),
+  ai:document.getElementById('view-ai'),
+  help:document.getElementById('view-help')
+};
+const sidebars={
+  user:document.getElementById('sidebar-user'),
+  admin:document.getElementById('sidebar-admin'),
+  super:document.getElementById('sidebar-super'),
+  ai:document.getElementById('sidebar-ai'),
+  help:document.getElementById('sidebar-help')
+};
+
+/* Show/Hide Demo */
+function openDemo(){ servicePage.classList.add('page--hidden'); demoLayer.classList.add('demo--visible'); demoLayer.setAttribute('aria-hidden','false'); }
+function closeDemo(){ demoLayer.classList.remove('demo--visible'); demoLayer.setAttribute('aria-hidden','true'); servicePage.classList.remove('page--hidden'); }
+
+/* Activate a tab: sync main view + sidebar */
+function activate(viewKey){
+  // main
+  Object.values(views).forEach(v=>v.classList.remove('view--active'));
+  (views[viewKey]||views.user).classList.add('view--active');
+
+  // sidebar
+  Object.values(sidebars).forEach(s=>s.classList.remove('sidebar-view--active'));
+  (sidebars[viewKey]||sidebars.user).classList.add('sidebar-view--active');
+
+  // tab aria
+  tabs.forEach(t=>t.setAttribute('aria-selected', String(t.dataset.view===viewKey)));
+}
+
+/* Wire up */
+btnDemo.addEventListener('click', openDemo);
+btnBack.addEventListener('click', closeDemo);
+tabs.forEach(tab=>tab.addEventListener('click',()=>activate(tab.dataset.view)));
+btnCTA.addEventListener('click',()=>{
+  // Hook to your existing "Get Service" modal or flow:
+  // openGetServiceModal();
+  alert('Connect this to your existing "Get Service" flow.');
+});
+
+/* Optional: open direct via hash */
+if(location.hash==='#demo') openDemo();
+</script>
+</body>
+</html>

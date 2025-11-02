@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ziyara — Super Admin</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* Accents (match user dash) */
+      --accent:#9b4fd6;
+      --accent-2:#7f1ea6;
+      --accent-3:#caa7ff;
+    
+      /* Glass + borders */
+      --glass-1: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.04);
+      --glass-3: rgba(155,79,214,0.16);
+      --border: rgba(202,167,255,0.28);
+    
+      --radius: 14px;
+      --shadow-sm: 0 6px 18px rgba(0,0,0,0.35);
+      --shadow-md: 0 10px 30px rgba(0,0,0,0.45);
+      --shadow-lg: 0 18px 50px rgba(0,0,0,0.55);
+    
+      --pill-h: 68px;
+    }
+    
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:'Poppins',sans-serif;
+      color:#f3edff;
+      /* Rich violet → indigo gradient + subtle vignettes */
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(124,58,237,0.18), transparent 55%),
+        radial-gradient(1000px 700px at 90% 20%, rgba(201,173,255,0.12), transparent 60%),
+        linear-gradient(180deg, #1a0b2e 0%, #2c1258 100%);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    
+    /* Decorative overlay (soft swirl/glow) */
+    .bg-overlay{
+      position:fixed; inset:0; pointer-events:none;
+      background:
+        radial-gradient(900px 600px at 85% -5%, rgba(155,79,214,0.20), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.25) 100%);
+      z-index:0;
+    }
+    
+    /* App layout */
+    .app{ position:relative; z-index:2; display:flex; min-height:100vh; gap:24px; padding:28px; box-sizing:border-box; }
+    
+    /* Sidebar — glassy, same palette as user dash */
+    .sidebar{
+      width:240px;
+      background: linear-gradient(180deg, var(--glass-2), rgba(255,255,255,0.02));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:18px;
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-md);
+      height:calc(100vh - 56px);
+      overflow:auto;
+    }
+    .sidebar .logo{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+    .sidebar .logo img{
+      width:56px; height:56px; object-fit:contain; border-radius:12px;
+      background:rgba(255,255,255,0.06); padding:6px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+    .sidebar h4{ font-family:'Cinzel', serif; margin:0; font-size:1.05rem; letter-spacing:0.4px }
+    .nav-pill{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+    .nav-pill button{
+      border-radius:12px; color:#efe9ff; background:transparent; border:0; padding:10px 12px;
+      text-align:left; transition:all .18s ease; font-weight:600; display:flex; gap:10px; align-items:center;
+    }
+    .nav-pill button:hover{
+      background: linear-gradient(90deg, rgba(155,79,214,0.14), rgba(155,79,214,0.08));
+      transform: translateX(2px);
+    }
+    .nav-pill button.active{
+      background: linear-gradient(90deg, rgba(155,79,214,0.22), rgba(155,79,214,0.12));
+      border-left:4px solid var(--accent);
+      color:#fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+      transform:translateX(4px);
+    }
+    
+    /* Main panel */
+    .panel{ flex:1; height:calc(100vh - 56px); overflow:auto; padding:22px; }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    .topbar h2{ margin:0; font-weight:700 }
+    .status-pill{
+      display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:999px;
+      background:var(--glass-2); border:1px solid var(--border); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+    
+    /* Cards */
+    .cards-row{ display:flex; gap:14px; margin-top:8px; margin-bottom:22px; flex-wrap:wrap; }
+    .pill-card{
+      min-width:180px; height:var(--pill-h); padding:12px 18px; border-radius:999px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+      display:flex; align-items:center; justify-content:space-between;
+      border:1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s, background .22s;
+    }
+    .pill-card:hover{
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-lg);
+      background: linear-gradient(90deg, rgba(155,79,214,0.18), rgba(155,79,214,0.08));
+    }
+    .pill-card .meta{display:flex; gap:12px; align-items:center}
+    .pill-card .meta i{font-size:20px; color:var(--accent-3)}
+    .pill-card h4{margin:0; font-size:0.9rem; color:#e9e3ff}
+    .pill-card .count{font-size:1.6rem; font-weight:700; letter-spacing:0.6px; color:#fff}
+    
+    /* Action bar buttons */
+    .actions{ display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+    .btn-accent{ background:linear-gradient(90deg,var(--accent),var(--accent-2)); border:0; color:#fff !important; box-shadow: 0 8px 22px rgba(155,79,214,0.35); }
+    .btn-accent:hover{ opacity:.95; transform:translateY(-2px) }
+    .btn-outline-light{
+      background: rgba(255,255,255,0.05) !important;
+      color: #efe9ff !important;
+      border: 1px solid var(--border) !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    .btn-outline-light:hover{ background: rgba(124,58,237,0.22) !important; color:#fff !important; }
+    
+    /* Section panels */
+    .section{
+      margin-top:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+      border-radius:var(--radius);
+      padding:14px;
+      border:1px solid var(--border);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    /* ✅ GLASSY TABLE (white text) */
+    .table{
+      background: linear-gradient(180deg, rgba(124,58,237,0.16), rgba(37,16,72,0.25));
+      backdrop-filter: blur(14px);
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      color:#fff;
+    }
+    .table thead th{
+      color:#fff;
+      font-weight:700;
+      font-size:0.92rem;
+      background: linear-gradient(180deg, rgba(155,79,214,0.35), rgba(155,79,214,0.18));
+      text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+      border-bottom:none;
+    }
+    .table tbody td{
+      color:#000;
+      border-top:1px solid rgba(255,255,255,0.07);
+      vertical-align:middle;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+    }
+    .table tbody tr:hover{
+      background: rgba(155,79,214,0.18);
+      transition:.2s;
+      cursor:pointer;
+    }
+    
+    /* Badges & statuses (white text) */
+    .badge-soft{
+      background: rgba(202,167,255,0.28);
+      color:#fff;
+      padding:6px 10px; border-radius:10px; font-weight:600;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    .badge-soft:hover{ background: rgba(202,167,255,0.42); }
+    .status-approved{ background:linear-gradient(90deg,#2dd4bf,#06b6d4); color:#03151a }
+    .status-pending{  background:linear-gradient(90deg,#f6d365,#fda085); color:#2b0d06 }
+    .status-checked{  background:linear-gradient(90deg,#a78bfa,#7c3aed); color:#150a2b }
+    
+    /* Activity list */
+    .log-item{ display:flex; gap:12px; align-items:flex-start; padding:10px 8px; border-bottom:1px dashed rgba(255,255,255,0.08) }
+    .log-item small{ opacity:0.9; color:#d8cff5 }
+    
+    /* AI chat colors (match theme) */
+    .msg.user{color:#caa7ff; margin-top:8px;}
+    .msg.bot{color:#7cffe1; margin-top:8px;}
+    .msg.system{color:#cfc7e9; font-style:italic; margin-top:8px;}
+    
+    /* Responsive */
+    @media(max-width:980px){
+      .sidebar{display:none}
+      .app{padding:14px}
+      .panel{height:auto}
+      .cards-row{justify-content:space-between}
+      .pill-card{min-width:140px}
+    }
+    
+    /* Subtle number lift animation */
+    .count-anim{ transition: transform .22s; will-change:transform }
+    </style>
+    
+    
+</head>
+<body>
+  <div class="bg-overlay"></div>
+
+  <div class="app container-fluid">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="Z.png" alt="Ziyara logo">
+        <div>
+          <h4>Ziyara</h4>
+          <div style="font-size:12px; color:#cfc9db">Super Admin</div>
+        </div>
+      </div>
+
+      <nav class="nav-pill">
+        <button class="active" onclick="navTo('overview', this)"><i class="bi bi-speedometer2"></i> Overview</button>
+        <button onclick="navTo('visitors', this)"><i class="bi bi-people"></i> Visitors</button>
+        <button onclick="navTo('events', this)"><i class="bi bi-calendar3"></i> Events</button>
+        <button onclick="navTo('admins', this)"><i class="bi bi-shield-lock"></i> Admins</button>
+        <button onclick="navTo('logs', this)"><i class="bi bi-list-check"></i> Activity</button>
+        <!-- ✅ Reports & AI tab -->
+        <button onclick="navTo('reports', this)"><i class="bi bi-bar-chart-line"></i> Reports & AI</button>
+        <button onclick="navTo('settings', this)"><i class="bi bi-gear"></i> Settings</button>
+      </nav>
+
+      <div style="margin-top:auto; margin-bottom:8px">
+        <hr style="border-color:rgba(255,255,255,0.08)">
+        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between">
+          <div style="font-size:12px; color:#dcd6e6">Signed in as</div>
+          <div style="font-weight:700">superadmin@ziyara.com</div>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:8px">
+          <button class="btn btn-sm btn-outline-light w-100" onclick="logout()">Logout</button>
+          <button class="btn btn-sm btn-danger w-100" onclick="resetSystem()">Reset</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN PANEL -->
+    <main class="panel">
+      <div class="topbar">
+        <div class="title">
+          <h2>Super Admin Dashboard</h2>
+          <div class="status-pill ms-2">
+            <i id="webStatusIcon" class="bi bi-check-circle-fill text-success"></i>
+            <div id="webStatusText" style="font-weight:700; font-size:0.95rem">Online</div>
+            <div style="width:12px"></div>
+            <small id="statusLast" style="opacity:.85">Updated just now</small>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px; align-items:center">
+          <button class="btn btn-outline-light btn-sm" onclick="simulateToggle()">Toggle Status</button>
+          <div class="dropdown">
+            <button class="btn btn-light btn-sm dropdown-toggle text-dark" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i> Super Admin
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" onclick="navTo('settings')">Settings</a></li>
+              <li><a class="dropdown-item" href="Login.html" onclick="logout()">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- OVERVIEW -->
+      <section id="overview" class="section">
+        <div class="cards-row">
+          <div class="pill-card">
+            <div class="meta">
+              <i class="bi bi-people-fill" style="font-size:22px"></i>
+              <div>
+                <h4>Visitors</h4>
+                <div style="font-size:12px; color:#cfc9db">Total registered visitors</div>
+              </div>
+            </div>
+            <div class="count-anim count" id="statVisitors">0</div>
+          </div>
+
+          <div class="pill-card">
+            <div class="meta">
+              <i class="bi bi-calendar-event-fill" style="font-size:22px"></i>
+              <div>
+                <h4>Events</h4>
+                <div style="font-size:12px; color:#cfc9db">Active / Scheduled</div>
+              </div>
+            </div>
+            <div class="count-anim count" id="statEvents">0</div>
+          </div>
+
+          <div class="pill-card">
+            <div class="meta">
+              <i class="bi bi-person-badge-fill" style="font-size:22px"></i>
+              <div>
+                <h4>Admins</h4>
+                <div style="font-size:12px; color:#cfc9db">Total admin accounts</div>
+              </div>
+            </div>
+            <div class="count-anim count" id="statAdmins">0</div>
+          </div>
+
+          <div class="pill-card" title="Active today">
+            <div class="meta">
+              <i class="bi bi-lightning-fill" style="font-size:22px"></i>
+              <div>
+                <h4>Active Today</h4>
+                <div style="font-size:12px; color:#cfc9db">Visitors checked in today</div>
+              </div>
+            </div>
+            <div class="count-anim count" id="statActive">0</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-accent text-white" data-bs-toggle="modal" data-bs-target="#addEventModal">
+            <i class="bi bi-plus-lg"></i> Add Event
+          </button>
+
+          <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#addAdminModal">
+            <i class="bi bi-person-plus"></i> Add Admin
+          </button>
+
+          <button class="btn btn-outline-light" onclick="navTo('events', this)">
+            <i class="bi bi-calendar3"></i> Manage Events
+          </button>
+
+          <div style="margin-left:auto; display:flex; gap:8px">
+            <input id="quickSearch" class="form-control form-control-sm" placeholder="Search visitors / admins" style="max-width:260px" oninput="quickSearch(this.value)">
+            <button class="btn btn-sm btn-light" onclick="refreshAll()"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+          </div>
+        </div>
+
+        <!-- quick stats + mini tables -->
+        <div class="row g-3 mt-3">
+          <div class="col-lg-6">
+            <div class="section">
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <h5 style="margin:0">Recent Visitors</h5>
+                <small id="visPreviewCount" style="color:#cfc9db">Latest 6</small>
+              </div>
+
+              <div id="recentVisitors" style="margin-top:10px"></div>
+            </div>
+          </div>
+
+          <div class="col-lg-6">
+            <div class="section">
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <h5 style="margin:0">Upcoming Events</h5>
+                <small style="color:#cfc9db">Manage schedules</small>
+              </div>
+
+              <div id="upcomingEvents" style="margin-top:10px"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISITORS -->
+      <section id="visitors" class="section" style="display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <h4>All Visitors</h4>
+          <div>
+            <button class="btn btn-sm btn-outline-light" onclick="exportCSV('visitors')"><i class="bi bi-download"></i> Export CSV</button>
+            <button class="btn btn-sm btn-outline-light" onclick="clearVisitors()">Clear Visitors</button>
+          </div>
+        </div>
+
+        <div class="table-responsive mt-3">
+          <table class="table table-borderless table-hover">
+            <thead><tr><th>Name</th><th>Purpose</th><th>Check-in</th><th>Check-out</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="visTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- EVENTS -->
+      <section id="events" class="section" style="display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <h4>Events</h4>
+          <div>
+            <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#addEventModal"><i class="bi bi-plus-lg"></i> New Event</button>
+            <button class="btn btn-sm btn-outline-light" onclick="exportCSV('events')"><i class="bi bi-download"></i> Export</button>
+          </div>
+        </div>
+
+        <div class="table-responsive mt-3">
+          <table class="table table-borderless table-hover">
+            <thead><tr><th>Title</th><th>Date</th><th>Venue</th><th>Slots</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="eventsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ADMINS -->
+      <section id="admins" class="section" style="display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <h4>Admin Accounts</h4>
+          <div>
+            <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#addAdminModal"><i class="bi bi-person-plus"></i> Add Admin</button>
+          </div>
+        </div>
+
+        <div class="table-responsive mt-3">
+          <table class="table table-borderless table-hover">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="adminsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ACTIVITY -->
+      <section id="logs" class="section" style="display:none">
+        <h4>Recent Activity</h4>
+        <div id="activityList" style="margin-top:10px; max-height:420px; overflow:auto"></div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings" class="section" style="display:none">
+        <h4>System Settings</h4>
+        <div style="margin-top:12px">
+          <div class="mb-3">
+            <label class="form-label">Web Status</label>
+            <div>
+              <button class="btn btn-sm btn-outline-light" onclick="simulateToggle()">Toggle Online/Offline</button>
+              <small style="margin-left:10px; color:#cfc9db">Use this to simulate site status for demo</small>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Theme Accent</label>
+            <input id="accentColor" type="color" value="#9b4fd6" onchange="changeAccent(this.value)">
+            <small style="display:block;color:#cfc9db">Change accent color (affects buttons)</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- ✅ REPORTS & AI (NEW) -->
+      <section id="reports" class="section" style="display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <h4>📊 Reports & AI Assistant</h4>
+          <button class="btn btn-sm btn-outline-light" id="generateReportBtn">
+            <i class="bi bi-stars"></i> Generate Statistical Report
+          </button>
+        </div>
+        <p style="color:#cfc9db; margin-top:6px;">Ask questions, visualize data, and generate reports using Gemini (uses the key saved in your user dashboard).</p>
+
+        <!-- Chart canvas -->
+        <canvas id="reportChart" class="mt-3"></canvas>
+
+        <!-- Chat area -->
+        <div class="mt-4 p-3" style="background:rgba(255,255,255,0.05); border-radius:10px;">
+          <h5>💬 Gemini Assistant</h5>
+          <div id="aiChatBox" style="max-height:240px; overflow-y:auto; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-top:8px; white-space:pre-wrap;">
+            <div class="msg system">Hi Super Admin 👑. Ask me about visitor trends, events, or request a chart (e.g., “Show daily visitors graph”).</div>
+          </div>
+          <div class="input-group mt-2">
+            <input id="aiChatInput" type="text" class="form-control form-control-sm" placeholder="Ask something..." />
+            <button class="btn btn-accent text-white btn-sm" id="aiChatSendBtn"><i class="bi bi-send"></i></button>
+          </div>
+        </div>
+
+        <!-- AI summary -->
+        <div class="mt-4 p-3" style="background:rgba(255,255,255,0.05); border-radius:10px;">
+          <h5>🧠 Gemini Statistical Summary</h5>
+          <div id="aiReportOutput" style="white-space:pre-wrap; margin-top:8px; min-height:100px;">
+            Click “Generate Statistical Report” to analyze platform data.
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <!-- Add Admin -->
+  <div class="modal fade" id="addAdminModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content text-dark">
+        <div class="modal-header"><h5 class="modal-title">Add Admin</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input id="adm_name" class="form-control mb-2" placeholder="Name">
+          <input id="adm_email" class="form-control mb-2" placeholder="Email">
+          <select id="adm_role" class="form-select mb-2">
+            <option>Admin</option>
+            <option>Security</option>
+            <option>Reception</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-accent text-white" onclick="addAdmin()">Add Admin</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Event -->
+  <div class="modal fade" id="addEventModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content text-dark">
+        <div class="modal-header"><h5 class="modal-title">Add Event</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <input id="ev_title" class="form-control mb-2" placeholder="Event Title">
+          <input id="ev_date" type="date" class="form-control mb-2">
+          <input id="ev_venue" class="form-control mb-2" placeholder="Venue">
+          <input id="ev_slots" type="number" class="form-control mb-2" placeholder="Slots available">
+          <textarea id="ev_notes" class="form-control mb-2" placeholder="Notes (optional)"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-accent text-white" id="eventSaveBtn" onclick="addEvent()">Create Event</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM REVOKE (tiny modal) -->
+  <div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content text-dark">
+        <div class="modal-body" id="confirmText">Confirm?</div>
+        <div class="modal-footer">
+          <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-danger" id="confirmOk">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap + Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // -------------------------
+    // data init (localStorage)
+    // -------------------------
+    const LS = {
+      users: 'ziyara_users',
+      visitors: 'ziyara_visitors',
+      admins: 'ziyara_admins',
+      events: 'ziyara_events',
+      logs: 'ziyara_logs',
+      webStatus: 'ziyara_webstatus'
+    };
+
+    // seed data if not present
+    function seed() {
+      if(!localStorage.getItem(LS.users)){
+        const seedUsers = [
+          {name:'Ravi Kumar', email:'ravi@ziyara.com'},
+          {name:'Priya Sharma', email:'priya@ziyara.com'}
+        ];
+        localStorage.setItem(LS.users, JSON.stringify(seedUsers));
+      }
+
+      if(!localStorage.getItem(LS.visitors)){
+        const seedVisitors = [
+          {name:'Amit Verma', purpose:'Conference', checkin:'2025-10-08T09:20', checkout:null, status:'Pending'},
+          {name:'Neha Singh', purpose:'Meeting', checkin:'2025-10-08T10:15', checkout:'2025-10-08T12:00', status:'Checked-out'},
+          {name:'Arthur Morgan', purpose:'Presentation', checkin:'2025-10-08T09:20', checkout:null, status:'Pending'},
+          {name:'Ragul', purpose:'Presentation', checkin:'2025-10-08T09:20', checkout:null, status:'Pending'},
+          {name:'Nandhana', purpose:'Orientation', checkin:'2025-10-08T09:20', checkout:null, status:'Pending'},
+          {name:'Prashant', purpose:'Delivery', checkin:'2025-10-08T09:20', checkout:null, status:'Pending'},
+          {name:'Zach King', purpose:'Inauguration', checkin:'2025-10-08T09:20', checkout:null, status:'Pending'}
+        ];
+        localStorage.setItem(LS.visitors, JSON.stringify(seedVisitors));
+      }
+
+      if(!localStorage.getItem(LS.admins)){
+        const seedAdmins = [
+          {name:'Randamonium', email:'superadmin@ziyara.com', role:'Super Admin', status:'active'},
+          {name:'Aadhi', email:'admin@ziyara.com', role:'Admin', status:'active'},
+          {name:'Hari', email:'security@ziyara.com', role:'Security', status:'active'},
+          {name:'Trelawny', email:'reception@ziyara.com', role:'Reception', status:'active'}
+        ];
+        localStorage.setItem(LS.admins, JSON.stringify(seedAdmins));
+      }
+
+      if(!localStorage.getItem(LS.events)){
+        const seedEvents = [
+          {id: idGen(), title:'Orientation Day', date:'2025-10-20', venue:'Hall A', slots:120, notes:'Welcome event', status:'Scheduled'},
+          {id: idGen(), title:'Cloud Workshop', date:'2025-11-02', venue:'Lab 3', slots:40, notes:'Bring laptop', status:'Scheduled'}
+        ];
+        localStorage.setItem(LS.events, JSON.stringify(seedEvents));
+      }
+
+      if(!localStorage.getItem(LS.logs)){
+        localStorage.setItem(LS.logs, JSON.stringify([]));
+      }
+
+      if(!localStorage.getItem(LS.webStatus)){
+        localStorage.setItem(LS.webStatus, JSON.stringify({online:true, updated: new Date().toISOString()}));
+      }
+    }
+
+    // id generator
+    function idGen(){ return 'id_' + Math.random().toString(36).slice(2,10); }
+
+    // read/write helpers
+    function read(key){ return JSON.parse(localStorage.getItem(key) || 'null') }
+    function write(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
+
+    // -------------------------
+    // UI helpers & population
+    // -------------------------
+    function refreshAll(){
+      populateOverview();
+      populateRecentVisitors();
+      populateEvents();
+      populateVisitorsTable();
+      populateAdmins();
+      populateLogs();
+      updateWebStatusUI();
+    }
+
+    // counters with small animation
+    function animateCount(element, value){
+      const el = document.getElementById(element);
+      if(!el) return;
+      el.style.transform = 'translateY(-6px)';
+      setTimeout(()=>{ el.innerText = value; el.style.transform = 'translateY(0)'; }, 140);
+    }
+
+    function populateOverview(){
+      const visitors = read(LS.visitors) || [];
+      const events = read(LS.events) || [];
+      const admins = read(LS.admins) || [];
+      const today = new Date().toDateString();
+      const activeToday = visitors.filter(v => v.checkin && new Date(v.checkin).toDateString() === today).length;
+
+      animateCount('statVisitors', visitors.length);
+      animateCount('statEvents', events.length);
+      animateCount('statAdmins', admins.length);
+      animateCount('statActive', activeToday);
+    }
+
+    function statusClass(s){
+      const val = String(s || '').toLowerCase();
+      if(val === 'approved') return 'status-approved';
+      if(val === 'pending') return 'status-pending';
+      if(val === 'checked-out' || val === 'checkedout' || val === 'checked') return 'status-checked';
+      return '';
+    }
+
+    function populateRecentVisitors(){
+      const v = (read(LS.visitors) || []).slice(-6).reverse();
+      const container = document.getElementById('recentVisitors');
+      if(!v.length){ container.innerHTML = '<div class="text-muted">No visitors yet</div>'; return }
+      container.innerHTML = v.map(vis => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 6px; border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div>
+            <div style="font-weight:700">${escapeHtml(vis.name)}</div>
+            <div style="font-size:12px; color:#cfc9db">${escapeHtml(vis.purpose)} • ${vis.checkin ? new Date(vis.checkin).toLocaleString() : 'Not checked in'}</div>
+          </div>
+          <div>
+            <span class="badge badge-soft ${statusClass(vis.status)}">${escapeHtml(vis.status)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function populateEvents(){
+      const events = read(LS.events) || [];
+      const container = document.getElementById('upcomingEvents');
+      const table = document.getElementById('eventsTableBody');
+      container.innerHTML = '';
+      if(!events.length){
+        container.innerHTML = '<div class="text-muted">No events scheduled</div>';
+        table.innerHTML = '';
+        animateCount('statEvents', 0);
+        return;
+      }
+      // show upcoming up to 6
+      const ups = events.slice(0,6);
+      container.innerHTML = ups.map(ev=>`
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 6px; border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div>
+            <div style="font-weight:700">${escapeHtml(ev.title)}</div>
+            <div style="font-size:12px; color:#cfc9db">${ev.date} • ${escapeHtml(ev.venue)}</div>
+          </div>
+          <div style="text-align:right">
+            <small style="color:#cfc9db">${ev.slots} slots</small>
+            <div style="margin-top:6px"><span class="badge badge-soft">${escapeHtml(ev.status)}</span></div>
+          </div>
+        </div>
+      `).join('');
+
+      table.innerHTML = events.map(ev=>`
+        <tr>
+          <td>${escapeHtml(ev.title)}</td>
+          <td>${ev.date}</td>
+          <td>${escapeHtml(ev.venue)}</td>
+          <td>${ev.slots}</td>
+          <td><span class="badge badge-soft">${escapeHtml(ev.status)}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline-light" onclick="editEvent('${ev.id}')"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="deleteEvent('${ev.id}')"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function populateVisitorsTable(){
+      const visitors = read(LS.visitors) || [];
+      const tbody = document.getElementById('visTableBody');
+      if(!visitors.length){ tbody.innerHTML = '<tr><td colspan="6" class="text-muted">No visitors</td></tr>'; return }
+      tbody.innerHTML = visitors.map((v,i)=>`
+        <tr>
+          <td>${escapeHtml(v.name)}</td>
+          <td>${escapeHtml(v.purpose)}</td>
+          <td>${v.checkin ? new Date(v.checkin).toLocaleString() : '-'}</td>
+          <td>${v.checkout ? new Date(v.checkout).toLocaleString() : '-'}</td>
+          <td><span class="badge badge-soft ${statusClass(v.status)}">${escapeHtml(v.status)}</span></td>
+          <td>
+            <button class="btn btn-sm btn-success" onclick="markCheckin(${i})"><i class="bi bi-box-arrow-in-right"></i></button>
+            <button class="btn btn-sm btn-warning" onclick="markCheckout(${i})"><i class="bi bi-box-arrow-right"></i></button>
+            <button class="btn btn-sm btn-danger" onclick="removeVisitor(${i})"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+      document.getElementById('visPreviewCount').innerText = `Latest ${Math.min(6, visitors.length)}`;
+    }
+
+    function populateAdmins(){
+      const admins = read(LS.admins) || [];
+      const tbody = document.getElementById('adminsTableBody');
+      if(!admins.length){ tbody.innerHTML = '<tr><td colspan="5" class="text-muted">No admins</td></tr>'; return }
+      tbody.innerHTML = admins.map((a, idx)=>`
+        <tr class="${a.status==='revoked' ? 'admin-revoked' : ''}">
+          <td>${escapeHtml(a.name)}</td>
+          <td>${escapeHtml(a.email)}</td>
+          <td>${escapeHtml(a.role)}</td>
+          <td><span class="badge badge-soft">${escapeHtml(a.status)}</span></td>
+          <td>
+            ${a.status==='active'
+              ? `<button class="btn btn-sm btn-outline-light" onclick="confirmRevoke(${idx})">Revoke</button>`
+              : `<button class="btn btn-sm btn-success" onclick="confirmRestore(${idx})">Restore</button>`}
+            <button class="btn btn-sm btn-danger" onclick="confirmDeleteAdmin(${idx})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+      animateCount('statAdmins', admins.length);
+    }
+
+    function populateLogs(){
+      const logs = (read(LS.logs) || []).slice().reverse();
+      const container = document.getElementById('activityList');
+      if(!logs.length){ container.innerHTML = '<div class="text-muted">No activity yet</div>'; return }
+      container.innerHTML = logs.map(l=>`
+        <div class="log-item">
+          <div style="width:34px; height:34px; border-radius:8px; background:rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div>
+            <div style="font-weight:700">${escapeHtml(l.action)}</div>
+            <small>${new Date(l.time).toLocaleString()}</small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // -------------------------
+    // actions: add admin, revoke, events
+    // -------------------------
+    function addAdmin(){
+      const name = document.getElementById('adm_name').value.trim();
+      const email = document.getElementById('adm_email').value.trim();
+      const role = document.getElementById('adm_role').value;
+      if(!name || !email) { alert('Fill fields'); return; }
+      const admins = read(LS.admins) || [];
+      admins.push({name,email,role,status:'active', id:idGen()});
+      write(LS.admins, admins);
+      logAction(`Added admin ${name} (${role})`);
+      populateAdmins();
+      bootstrap.Modal.getInstance(document.getElementById('addAdminModal')).hide();
+      document.getElementById('adm_name').value=''; document.getElementById('adm_email').value='';
+    }
+
+    function confirmRevoke(idx){
+      const admins = read(LS.admins) || [];
+      const a = admins[idx];
+      if(!a) return;
+      showConfirm(`Revoke permissions for ${a.name}?`, ()=>{
+        a.status='revoked';
+        write(LS.admins, admins);
+        logAction(`Revoked admin ${a.name}`);
+        populateAdmins();
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+      });
+    }
+    function confirmRestore(idx){
+      const admins = read(LS.admins) || [];
+      const a = admins[idx];
+      if(!a) return;
+      showConfirm(`Restore permissions for ${a.name}?`, ()=>{
+        a.status='active';
+        write(LS.admins, admins);
+        logAction(`Restored admin ${a.name}`);
+        populateAdmins();
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+      });
+    }
+    function confirmDeleteAdmin(idx){
+      const admins = read(LS.admins) || [];
+      const a = admins[idx];
+      if(!a) return;
+      showConfirm(`Delete admin ${a.name}? This is permanent.`, ()=>{
+        admins.splice(idx,1);
+        write(LS.admins, admins);
+        logAction(`Deleted admin ${a.name}`);
+        populateAdmins();
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+      });
+    }
+
+    function showConfirm(message, cb){
+      document.getElementById('confirmText').innerText = message;
+      const ok = document.getElementById('confirmOk');
+      ok.onclick = null;
+      ok.onclick = cb;
+      new bootstrap.Modal(document.getElementById('confirmModal')).show();
+    }
+
+    // events
+    function addEvent(){
+      const title = document.getElementById('ev_title').value.trim();
+      const date = document.getElementById('ev_date').value;
+      const venue = document.getElementById('ev_venue').value.trim();
+      const slots = Number(document.getElementById('ev_slots').value) || 0;
+      const notes = document.getElementById('ev_notes').value.trim();
+      if(!title || !date || !venue){ alert('Provide title, date, venue'); return; }
+      const events = read(LS.events) || [];
+      const e = {id:idGen(), title, date, venue, slots, notes, status:'Scheduled'};
+      events.unshift(e);
+      write(LS.events, events);
+      logAction(`Created event "${title}" on ${date}`);
+      populateEvents();
+      bootstrap.Modal.getInstance(document.getElementById('addEventModal')).hide();
+      document.getElementById('ev_title').value=''; document.getElementById('ev_date').value='';
+      document.getElementById('ev_venue').value=''; document.getElementById('ev_slots').value=''; document.getElementById('ev_notes').value='';
+    }
+
+    function editEvent(id){
+      const events = read(LS.events) || [];
+      const e = events.find(x=>x.id===id);
+      if(!e) return alert('Event not found');
+      document.getElementById('ev_title').value = e.title;
+      document.getElementById('ev_date').value = e.date;
+      document.getElementById('ev_venue').value = e.venue;
+      document.getElementById('ev_slots').value = e.slots;
+      document.getElementById('ev_notes').value = e.notes;
+      const modalEl = document.getElementById('addEventModal');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+
+      // temporarily repurpose the save button
+      const saveBtn = document.getElementById('eventSaveBtn');
+      const originalHandler = saveBtn.onclick;
+      saveBtn.textContent = 'Save Changes';
+      saveBtn.onclick = ()=>{
+        e.title = document.getElementById('ev_title').value.trim();
+        e.date = document.getElementById('ev_date').value;
+        e.venue = document.getElementById('ev_venue').value.trim();
+        e.slots = Number(document.getElementById('ev_slots').value) || 0;
+        e.notes = document.getElementById('ev_notes').value.trim();
+        write(LS.events, events);
+        logAction(`Edited event "${e.title}"`);
+        populateEvents();
+        modal.hide();
+        // restore button to default state
+        saveBtn.textContent = 'Create Event';
+        saveBtn.onclick = originalHandler;
+      };
+    }
+
+    function deleteEvent(id){
+      const events = read(LS.events) || [];
+      showConfirm('Delete this event permanently?', ()=>{
+        const idx = events.findIndex(x=>x.id===id);
+        if(idx>=0) events.splice(idx,1);
+        write(LS.events, events);
+        logAction('Deleted event');
+        populateEvents();
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+      });
+    }
+
+    // visitors actions
+    function markCheckin(i){
+      const visitors = read(LS.visitors) || [];
+      if(!visitors[i]) return;
+      visitors[i].checkin = new Date().toISOString();
+      visitors[i].status = 'Approved';
+      write(LS.visitors, visitors);
+      logAction(`Checked in ${visitors[i].name}`);
+      populateVisitorsTable();
+      populateRecentVisitors();
+    }
+    function markCheckout(i){
+      const visitors = read(LS.visitors) || [];
+      if(!visitors[i]) return;
+      visitors[i].checkout = new Date().toISOString();
+      visitors[i].status = 'Checked-out';
+      write(LS.visitors, visitors);
+      logAction(`Checked out ${visitors[i].name}`);
+      populateVisitorsTable();
+      populateRecentVisitors();
+    }
+    function removeVisitor(i){
+      const visitors = read(LS.visitors) || [];
+      const name = visitors[i] ? visitors[i].name : 'visitor';
+      showConfirm(`Delete visitor ${name}?`, ()=>{
+        visitors.splice(i,1);
+        write(LS.visitors, visitors);
+        logAction(`Deleted visitor ${name}`);
+        populateVisitorsTable();
+        populateRecentVisitors();
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+      });
+    }
+
+    function clearVisitors(){
+      if(!confirm('Clear all visitor data?')) return;
+      write(LS.visitors, []);
+      logAction('Cleared all visitors');
+      populateVisitorsTable();
+      populateRecentVisitors();
+    }
+
+    // -------------------------
+    // logs / misc helpers
+    // -------------------------
+    function logAction(action){
+      const logs = read(LS.logs) || [];
+      logs.push({action, time: new Date().toISOString()});
+      if(logs.length>300) logs.shift();
+      write(LS.logs, logs);
+      populateLogs();
+    }
+
+    // web status
+    function updateWebStatusUI(){
+      const st = read(LS.webStatus) || {online:true, updated:new Date().toISOString()};
+      const icon = document.getElementById('webStatusIcon');
+      const txt = document.getElementById('webStatusText');
+      const last = document.getElementById('statusLast');
+      if(st.online){ icon.className='bi bi-check-circle-fill text-success'; txt.innerText='Online'; }
+      else { icon.className='bi bi-x-circle-fill text-danger'; txt.innerText='Offline'; }
+      last.innerText = `Updated ${new Date(st.updated).toLocaleString()}`;
+    }
+
+    function simulateToggle(){
+      const st = read(LS.webStatus) || {online:true};
+      st.online = !st.online;
+      st.updated = new Date().toISOString();
+      write(LS.webStatus, st);
+      logAction(`Toggled web status → ${st.online ? 'Online' : 'Offline'}`);
+      updateWebStatusUI();
+    }
+
+    function changeAccent(v){
+      document.documentElement.style.setProperty('--accent', v);
+      // derive a deeper variant for gradients
+      try{
+        const col = v.replace('#','');
+        if(col.length===6){
+          const r=parseInt(col.slice(0,2),16), g=parseInt(col.slice(2,4),16), b=parseInt(col.slice(4,6),16);
+          const dark = `#${Math.max(0,r-32).toString(16).padStart(2,'0')}${Math.max(0,g-32).toString(16).padStart(2,'0')}${Math.max(0,b-32).toString(16).padStart(2,'0')}`;
+          document.documentElement.style.setProperty('--accent-2', dark);
+        }
+      }catch{}
+    }
+
+    // quick search
+    function quickSearch(q){
+      q = q.trim().toLowerCase();
+      if(!q){ refreshAll(); return; }
+      const visitors = (read(LS.visitors) || []).filter(x=> JSON.stringify(x).toLowerCase().includes(q));
+      const admins = (read(LS.admins) || []).filter(x=> JSON.stringify(x).toLowerCase().includes(q));
+      const tbody = document.getElementById('visTableBody');
+      tbody.innerHTML = visitors.map((v,i)=>`
+        <tr>
+          <td>${escapeHtml(v.name)}</td>
+          <td>${escapeHtml(v.purpose)}</td>
+          <td>${v.checkin ? new Date(v.checkin).toLocaleString() : '-'}</td>
+          <td>${v.checkout ? new Date(v.checkout).toLocaleString() : '-'}</td>
+          <td><span class="badge badge-soft ${statusClass(v.status)}">${escapeHtml(v.status)}</span></td>
+          <td><button class="btn btn-sm btn-success" onclick="markCheckin(${i})">Check-in</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="6" class="text-muted">No match</td></tr>';
+
+      const tbodyA = document.getElementById('adminsTableBody');
+      tbodyA.innerHTML = admins.map((a, idx)=>`
+        <tr class="${a.status==='revoked' ? 'admin-revoked' : ''}">
+          <td>${escapeHtml(a.name)}</td>
+          <td>${escapeHtml(a.email)}</td>
+          <td>${escapeHtml(a.role)}</td>
+          <td><span class="badge badge-soft">${escapeHtml(a.status)}</span></td>
+          <td>
+            ${a.status==='active' ? `<button class="btn btn-sm btn-outline-light" onclick="confirmRevoke(${idx})">Revoke</button>` : `<button class="btn btn-sm btn-success" onclick="confirmRestore(${idx})">Restore</button>`}
+            <button class="btn btn-sm btn-danger" onclick="confirmDeleteAdmin(${idx})">Delete</button>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="5" class="text-muted">No match</td></tr>';
+
+      navTo('visitors', document.querySelector('.nav-pill button:nth-child(2)'));
+    }
+
+    // export csv (simple)
+    function exportCSV(type){
+      let data = [];
+      if(type==='visitors') data = read(LS.visitors) || [];
+      if(type==='events') data = read(LS.events) || [];
+      if(!data.length) return alert('No data to export');
+      const keys = Object.keys(data[0]);
+      const csv = [keys.join(',')].concat(data.map(r => keys.map(k=>`"${String(r[k]||'').replace(/"/g,'""')}"`).join(','))).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `ziyara_${type}_${Date.now()}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // -------------------------
+    // navigation & misc UI
+    // -------------------------
+    function navTo(id, btn){
+      document.querySelectorAll('.panel section').forEach(s=>s.style.display='none');
+      const el = document.getElementById(id);
+      if(el) el.style.display='block';
+      document.querySelectorAll('.nav-pill button').forEach(b=>b.classList.remove('active'));
+      if(btn && btn.tagName==='BUTTON') btn.classList.add('active');
+      if(id==='overview') populateOverview();
+      if(id==='visitors') populateVisitorsTable();
+      if(id==='events') populateEvents();
+      if(id==='admins') populateAdmins();
+      if(id==='logs') populateLogs();
+      // reports tab builds content on demand
+    }
+
+    function logout(){
+      if(!confirm('Logout from Super Admin?')) return;
+      alert('Logged out (demo). In production, redirect to login page.');
+      window.location.href = 'newlog.html';
+    }
+
+    function resetSystem(){
+      if(!confirm('Reset all system data (this clears localStorage for the app)?')) return;
+      localStorage.removeItem(LS.users);
+      localStorage.removeItem(LS.visitors);
+      localStorage.removeItem(LS.admins);
+      localStorage.removeItem(LS.events);
+      localStorage.removeItem(LS.logs);
+      localStorage.removeItem(LS.webStatus);
+      seed();
+      refreshAll();
+      alert('System reset (seeded demo data).');
+    }
+
+    // small helpers
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+
+    // -------------------------
+    // Initialize
+    // -------------------------
+    (function init(){
+      seed();
+      refreshAll();
+      updateWebStatusUI();
+      setInterval(()=>{ updateWebStatusUI(); }, 60000);
+      navTo('overview', document.querySelector('.nav-pill button'));
+    })();
+  </script>
+
+  <!-- 🔮 Reports & AI integration (Gemini + Chart.js) -->
+  <script>
+    // Use a safe LS key (do NOT store the API key as the key name itself)
+    // Save once elsewhere: localStorage.setItem('ziyara_gemini_key', 'YOUR_API_KEY')
+    const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
+    function getApiKey(){ return localStorage.getItem('ziyara_gemini_key') || ''; } // safer storage key
+
+    function getPlatformStats(){
+      const visitors = JSON.parse(localStorage.getItem('ziyara_visitors')||'[]');
+      const events = JSON.parse(localStorage.getItem('ziyara_events')||'[]');
+      const admins = JSON.parse(localStorage.getItem('ziyara_admins')||'[]');
+      const logs = JSON.parse(localStorage.getItem('ziyara_logs')||'[]');
+
+      // last 7 days (labels) – locale-friendly
+      const days = [...Array(7)].map((_,i)=>{
+        const d = new Date(); d.setDate(d.getDate()-i);
+        return d.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric'});
+      }).reverse();
+
+      // counts by day based on check-in date
+      const dailyVisitorCounts = days.map((label, idx) => {
+        const dayDate = new Date(); dayDate.setDate(dayDate.getDate() - (days.length-1-idx));
+        const dayStr = dayDate.toDateString();
+        return visitors.filter(v => v.checkin && new Date(v.checkin).toDateString()===dayStr).length;
+      });
+
+      return { visitors, events, admins, logs, days, dailyVisitorCounts };
+    }
+
+    // Chart.js line using theme variables (no layout changes)
+    let aiReportChart;
+    function drawChart(stats){
+      const ctx = document.getElementById('reportChart').getContext('2d');
+      if(aiReportChart) aiReportChart.destroy();
+      aiReportChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: stats.days,
+          datasets: [{
+            label: 'Daily Visitors',
+            data: stats.dailyVisitorCounts,
+            borderWidth: 2,
+            tension: 0.35,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              ticks: { color:'#e9e3ff' },
+              grid: { color:'rgba(255,255,255,0.08)' }
+            },
+            y: {
+              ticks: { color:'#e9e3ff' },
+              grid: { color:'rgba(255,255,255,0.08)' }
+            }
+          },
+          plugins:{
+            legend:{ labels:{ color:'#efe9ff' } }
+          }
+        }
+      });
+      // set canvas height smoothly without layout jump
+      document.getElementById('reportChart').style.minHeight = '260px';
+    }
+
+    async function generateGeminiReport(){
+      const stats = getPlatformStats();
+      drawChart(stats);
+      const output = document.getElementById('aiReportOutput');
+      output.textContent = '⏳ Generating report...';
+
+      const key = getApiKey();
+      if(!key){ output.textContent = '⚠️ Gemini key not found in localStorage. Save it under key "ziyara_gemini_key".'; return; }
+
+      const prompt = `
+      You are Ziyara's Super Admin AI.
+      Generate a concise statistical report using the following JSON.
+      Include: key counts, weekly trends, any anomalies, and 2-3 actionable recommendations.
+      Data:
+      ${JSON.stringify(stats, null, 2)}
+      `;
+
+      try{
+        const res = await fetch(GEMINI_ENDPOINT + '?key=' + encodeURIComponent(key), {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ contents:[{ role:'user', parts:[{ text: prompt }]}] })
+        });
+        const data = await res.json();
+        const text = data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || 'No response.';
+        output.textContent = text;
+      }catch(e){
+        console.error(e);
+        output.textContent = '⚠️ Error generating report.';
+      }
+    }
+
+    async function handleAIChat(){
+      const input = document.getElementById('aiChatInput');
+      const box = document.getElementById('aiChatBox');
+      const text = input.value.trim();
+      if(!text) return;
+      input.value = '';
+      box.innerHTML += `<div class="msg user">${text}</div>`;
+
+      const stats = getPlatformStats();
+      if(/chart|graph|show/i.test(text)) drawChart(stats);
+
+      const key = getApiKey();
+      if(!key){ box.innerHTML += `<div class="msg system">⚠️ Gemini key not found. Save it under "ziyara_gemini_key".</div>`; return; }
+
+      const prompt = `
+      The admin asked: "${text}".
+      Use the following platform data to answer accurately. If asked to visualize, say what you plotted and why.
+      Data:
+      ${JSON.stringify(stats, null, 2)}
+      `;
+
+      try{
+        const res = await fetch(GEMINI_ENDPOINT + '?key=' + encodeURIComponent(key), {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ contents:[{ role:'user', parts:[{ text: prompt }]}] })
+        });
+        const data = await res.json();
+        const reply = data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || 'No response.';
+        box.innerHTML += `<div class="msg bot">${reply}</div>`;
+        box.scrollTop = box.scrollHeight;
+      }catch(e){
+        console.error(e);
+        box.innerHTML += `<div class="msg system">⚠️ Error talking to Gemini.</div>`;
+      }
+    }
+
+    // Wire up buttons
+    document.getElementById('generateReportBtn').addEventListener('click', generateGeminiReport);
+    document.getElementById('aiChatSendBtn').addEventListener('click', handleAIChat);
+    document.getElementById('aiChatInput').addEventListener('keydown', (e)=>{
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); handleAIChat(); }
+    });
+  </script>
+</body>
+</html>

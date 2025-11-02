@@ -1,0 +1,1660 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ziyara — User Dashboard</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent: #7c3aed;
+      --accent-2: #9b5cf6;
+      --gold: #ffd700;  /* ✨ new gold color */
+      --glass-weak: rgba(255,255,255,0.03);
+      --muted-white: rgba(255,255,255,0.75);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:'Poppins',system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      min-height:100vh;
+      color:#eee;
+      -webkit-font-smoothing:antialiased;
+      background-image: url('bg.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* dark overlay to mimic admin screenshot */
+    body::before{
+      content:"";
+      position:fixed;inset:0;z-index:0;
+      background: linear-gradient(180deg, rgba(15,6,20,0.78), rgba(25,10,34,0.82));
+      pointer-events:none;
+    }
+
+    .app {
+      position:relative; z-index:1;
+      display:flex; gap:1.25rem; padding:28px;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      width:300px; min-width:220px;
+      border-radius:14px;
+      padding:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03);
+      backdrop-filter: blur(8px) saturate(120%);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      height: calc(100vh - 56px);
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .logo-wrap{ display:flex; gap:12px; align-items:center; margin-bottom:12px }
+    .logo-img { width:56px; height:56px; border-radius:12px; overflow:hidden; box-shadow: 0 10px 26px rgba(124,58,237,0.14) }
+    .logo-img img{ width:100%; height:100%; object-fit:cover; display:block }
+    .app-title{ font-weight:700; font-size:1.05rem; letter-spacing:0.4px }
+    .app-sub{ font-size:.82rem; color: var(--muted-white) }
+
+    .profile { display:flex; gap:12px; align-items:center; padding:12px; border-radius:10px; background: rgba(255,255,255,0.01); margin-bottom:10px }
+    .avatar { width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff }
+    .profile .meta { font-size:.9rem; font-weight:600 }
+
+    .nav-list { margin-top:8px; display:flex; flex-direction:column; gap:6px }
+    .nav-item {
+      display:flex; align-items:center; gap:12px; padding:10px; border-radius:10px; color:var(--muted-white); cursor:pointer;
+      transition: all .14s ease;
+    }
+    .nav-item .fa { width:24px; text-align:center; color:var(--accent) }
+    .nav-item:hover{ transform: translateY(-3px); background: rgba(255,255,255,0.02) }
+    .nav-item.active{ background: linear-gradient(90deg, rgba(124,58,237,0.08), rgba(155,92,246,0.03)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02) }
+
+    .sidebar .bottom { display:flex; flex-direction:column; gap:8px }
+    .small-muted{ color: var(--muted-white); opacity:.9; font-size:.86rem }
+
+    /* MAIN AREA */
+    .main {
+      flex:1; display:flex; flex-direction:column; gap:14px; min-width:0;
+    }
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between; gap:8px;
+    }
+    .title { font-size:2rem; font-weight:800 }
+    .subtitle{ color:var(--muted-white); opacity:.9 }
+
+    .search { min-width:280px; max-width:420px }
+
+    /* cards row */
+    .cards-row { display:flex; gap:12px; flex-wrap:wrap }
+    .card {
+      flex:1; min-width:200px; padding:14px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
+      border:1px solid rgba(255,255,255,0.03); backdrop-filter: blur(8px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.55);
+    }
+    .card .kicker {
+      font-size: .85rem;
+      color: #ffd700;     /* ✨ changed to gold */
+      margin-bottom: 8px;
+    }
+    .big-num { font-size:1.35rem; font-weight:800 }
+
+    /* content area that contains the different "pages" */
+    .workspace {
+      margin-top:6px; display:block;
+      min-height: 420px;
+    }
+    .page {
+      display:none; opacity:0; transform: translateY(8px); transition: all .24s ease;
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .page.active { display:block; opacity:1; transform: translateY(0) }
+
+    .panel {
+      margin-top:10px; padding:14px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03); box-shadow: 0 10px 26px rgba(0,0,0,0.55);
+    }
+
+    /* lists */
+    .list-item { display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:10px; margin-bottom:8px; background: rgba(255,255,255,0.01) }
+    .event-badge { padding:.35rem .6rem; border-radius:999px; background: rgba(124,58,237,0.12); color:var(--accent); font-weight:700 }
+
+    .notif { display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:10px }
+    .notif.unread { background: linear-gradient(90deg, rgba(124,58,237,0.04), rgba(124,58,237,0.02)); border:1px solid rgba(124,58,237,0.04) }
+
+    /* small screens */
+    @media (max-width: 1100px){
+      .sidebar { display:none }
+      .app { padding:16px }
+      .cards-row { flex-direction:column }
+    }
+
+    /* theme toggle look */
+    .btn-accent { background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:white; border:none; box-shadow: 0 8px 22px rgba(124,58,237,0.16) }
+    .btn-ghost { background:transparent; border:1px solid rgba(255,255,255,0.04); color:var(--muted-white) }
+
+    /* small helper */
+    .muted { color:var(--muted-white); font-size:.9rem }
+
+    /* =========================================
+       Centered Chat Modal styles
+       ========================================= */
+    .chat-backdrop{
+      position: fixed; inset:0; z-index: 9998; display:none;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(2px);
+    }
+    .chat-modal{
+      position: fixed; inset:0; z-index: 9999; display:none;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .chat-card{
+      width: min(680px, 92vw);
+      max-height: 82vh;
+      display:flex; flex-direction:column;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      border-radius: 16px;
+      overflow: hidden;
+      backdrop-filter: blur(10px) saturate(120%);
+    }
+    .chat-header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding: 12px 14px;
+      background: linear-gradient(90deg, rgba(124,58,237,0.18), rgba(155,92,246,0.12));
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .chat-header .title{
+      font-weight:800; letter-spacing:.4px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .chat-body{
+      padding: 12px;
+      overflow: auto;
+      display:flex; flex-direction:column; gap:10px;
+      min-height: 320px;
+    }
+    .msg{
+      max-width: 80%; padding:10px 12px; border-radius:12px; font-size:.95rem; line-height:1.4;
+      background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08);
+      white-space: pre-wrap;
+    }
+    .msg.user{ align-self:flex-end; background: rgba(124,58,237,0.22); border:1px solid rgba(124,58,237,0.35) }
+    .msg.bot{ align-self:flex-start }
+    .msg.system{ align-self:center; font-size:.85rem; opacity:.85; background: transparent; border:none }
+    .chat-footer{
+      padding: 10px; border-top:1px solid rgba(255,255,255,0.08);
+      display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center;
+      background: rgba(0,0,0,0.12);
+    }
+    .chat-input{ resize:none; height:48px }
+    .api-box{
+      display:flex; gap:8px; align-items:center;
+      padding: 8px 12px; background: rgba(255,255,255,0.04);
+      border-top: 1px dashed rgba(255,255,255,0.1);
+      display: none !important;
+    }
+    .api-box input{
+      flex:1
+    }
+    .btn-icon{
+      background: transparent; border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:10px; height:40px; width:44px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .btn-icon:hover{ background: rgba(255,255,255,0.06) }
+    .hidden{display:none !important}
+
+    /* =========================================
+       NEW: Register Modal (minimal, matches chat)
+       ========================================= */
+    .reg-backdrop{
+      position: fixed; inset:0; z-index: 9996; display:none;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(2px);
+    }
+    .reg-modal{
+      position: fixed; inset:0; z-index: 9997; display:none;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .reg-card{
+      width: min(620px, 92vw);
+      display:flex; flex-direction:column;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+      border-radius: 16px; overflow:hidden;
+      backdrop-filter: blur(10px) saturate(120%);
+    }
+    .reg-header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding: 12px 14px;
+      background: linear-gradient(90deg, rgba(124,58,237,0.18), rgba(155,92,246,0.12));
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .reg-body{ padding:14px; }
+    .photo-preview{
+      width:96px;height:96px;border-radius:12px;overflow:hidden;
+      background: rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(255,255,255,0.15);
+    }
+    .photo-preview img{ width:100%;height:100%;object-fit:cover;display:block }
+    .help-tiny{ font-size:.8rem; color:var(--muted-white) }
+    /* Hidden working surfaces for pass creation */
+    #qrTemp, #passCanvas { position: absolute; left:-99999px; top:-99999px; }
+  </style>
+</head>
+<body>
+  <div class="app container-fluid">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div>
+        <div class="logo-wrap">
+          <div class="logo-img"><img src="z.png" alt="Z logo"></div>
+          <div>
+            <div class="app-title">Ziyara</div>
+            <div class="app-sub">Visitor Portal</div>
+          </div>
+        </div>
+
+        <div class="profile">
+          <div class="avatar" id="sidebarAvatar">U</div>
+          <div>
+            <div class="meta" id="sidebarName">User</div>
+            <div class="small-muted" id="sidebarEmail">user@ziyara</div>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <div class="nav-item active" data-page="overview"><i class="fa fa-house"></i> Overview</div>
+          <div class="nav-item" data-page="my-events"><i class="fa fa-calendar-check"></i> My Events</div>
+          <div class="nav-item" data-page="upcoming"><i class="fa fa-calendar-days"></i> Upcoming Events</div>
+          <div class="nav-item" data-page="notifications"><i class="fa fa-bell"></i> Notifications <span id="navNotCount" class="event-badge ms-2" style="display:none"></span></div>
+          <div class="nav-item" data-page="help"><i class="fa fa-life-ring"></i> Help & Support</div>
+          <div class="nav-item" data-page="settings"><i class="fa fa-gear"></i> Settings</div>
+        </nav>
+      </div>
+
+      <div class="bottom">
+        <div style="display:flex; gap:8px">
+          <button id="logoutBtn" class="btn btn-outline-light btn-sm w-50">Logout</button>
+          <button id="themeBtn" class="btn btn-accent btn-sm w-50"><i class="fa fa-sun me-2"></i>Theme</button>
+        </div>
+        <div style="margin-top:10px" class="small-muted">Signed in as</div>
+        <div style="font-weight:700" id="sidebarSignedEmail">—</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <div class="title" id="welcomeTitle">Welcome back</div>
+          <div class="subtitle">Your visits, events and notifications — all in one place</div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px">
+          <input id="globalSearch" class="form-control search form-control-sm" placeholder="Search events or notifications">
+          <div class="status-pill muted small-muted" style="padding:.45rem .7rem; border-radius:999px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03)">
+            <i class="fa fa-circle" style="color:#2ecc71; font-size:.6rem; margin-right:.6rem"></i> Online
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-ghost dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-user"></i></button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" data-action="go-settings">Profile & Settings</a></li>
+              <li><a class="dropdown-item" href="#" id="signOut">Sign out</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- stat cards -->
+      <section class="cards-row">
+        <div class="card">
+          <div class="kicker">My Events</div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="big-num" id="statMyEvents">0</div>
+              <div class="muted">Events you've registered</div>
+            </div>
+            <div><i class="fa fa-calendar-check fa-2x"></i></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="kicker">Notifications</div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="big-num" id="statNotifs">0</div>
+              <div class="muted">Unread notifications</div>
+            </div>
+            <div><i class="fa fa-bell fa-2x"></i></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="kicker">Active Pass</div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="big-num" id="statPass">No active</div>
+              <div class="muted">Visitor pass status</div>
+            </div>
+            <div><i class="fa fa-id-card fa-2x"></i></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="kicker">Upcoming Events</div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="big-num" id="statUpcoming">0</div>
+              <div class="muted">Events you might like</div>
+            </div>
+            <div><i class="fa fa-calendar-days fa-2x"></i></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- workspace: pages (Overview, My Events, Notifications, Help, Settings) -->
+      <div class="workspace">
+        <!-- OVERVIEW page (default) -->
+        <section id="page-overview" class="page active">
+          <div class="panel">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 style="margin:0">Overview</h5>
+              <div class="small-muted">Snapshot of your account</div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-lg-7">
+                <div class="panel">
+                  <h6 style="margin:0 0 10px 0">My Event History</h6>
+                  <div id="historyArea">
+                    <!-- history list items -->
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-5 mt-3 mt-lg-0">
+                <div class="panel">
+                  <h6 style="margin:0 0 10px 0">Upcoming Events</h6>
+                  <div id="upcomingArea">
+                    <!-- upcoming list items -->
+                  </div>
+                </div>
+
+                <div class="panel mt-3">
+                  <h6 style="margin:0 0 10px 0">Notifications (quick)</h6>
+                  <div id="quickNotifs">
+                    <!-- small notif list -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MY EVENTS page -->
+        <section id="page-my-events" class="page">
+          <div class="panel">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 style="margin:0">My Events</h5>
+              <div class="small-muted">Manage your registrations</div>
+            </div>
+
+            <div id="myEventsArea" class="mt-3">
+              <!-- my events injected -->
+            </div>
+          </div>
+        </section>
+
+        <!-- UPCOMING page -->
+        <section id="page-upcoming" class="page">
+          <div class="panel">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 style="margin:0">Browse Upcoming Events</h5>
+              <div class="small-muted">Register or set reminders</div>
+            </div>
+
+            <div id="browseArea" class="mt-3">
+              <!-- upcoming events -->
+            </div>
+          </div>
+        </section>
+
+        <!-- NOTIFICATIONS page -->
+        <section id="page-notifications" class="page">
+          <div class="panel">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 style="margin:0">Notifications</h5>
+              <div>
+                <button class="btn btn-sm btn-ghost" id="markAllRead">Mark all read</button>
+                <button class="btn btn-sm btn-outline-light" id="clearAll">Clear</button>
+              </div>
+            </div>
+
+            <div id="notifArea" class="mt-3">
+              <!-- notifications injected -->
+            </div>
+          </div>
+        </section>
+
+        <!-- HELP page -->
+        <section id="page-help" class="page">
+          <div class="panel">
+            <h5 style="margin:0">Help & Support</h5>
+            <div class="small-muted mt-1">Choose a way to get help</div>
+
+            <div class="mt-3 d-grid gap-2">
+              <button class="btn btn-outline-light" onclick="openHelp('faq')"><i class="fa fa-question-circle me-2"></i>FAQ</button>
+              <button class="btn btn-outline-light" onclick="openHelp('chat')"><i class="fa fa-comments me-2"></i>Chat with support</button>
+              <button class="btn btn-outline-light" onclick="openHelp('guide')"><i class="fa fa-book me-2"></i>User guide</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SETTINGS page -->
+        <section id="page-settings" class="page">
+          <div class="panel">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 style="margin:0">Settings</h5>
+              <div class="small-muted">Edit profile and preferences</div>
+            </div>
+
+            <form id="settingsForm" class="mt-3">
+              <div class="mb-2">
+                <label class="form-label small-muted">Display name</label>
+                <input id="inputName" class="form-control form-control-sm" />
+              </div>
+
+              <div class="mb-2">
+                <label class="form-label small-muted">Email</label>
+                <input id="inputEmail" class="form-control form-control-sm" />
+              </div>
+
+              <div class="mb-2 d-flex gap-2">
+                <button class="btn btn-accent btn-sm" type="submit">Save</button>
+                <button class="btn btn-ghost btn-sm" type="button" id="resetProfile">Reset</button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
+
+      <footer class="small-muted">© Ziyara — Visitor Management</footer>
+    </main>
+  </div>
+
+  <!-- =========================================
+       Chat Modal Markup (centered popup)
+       ========================================= -->
+  <div id="chatBackdrop" class="chat-backdrop"></div>
+  <div id="chatModal" class="chat-modal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="chat-card">
+      <div class="chat-header">
+        <div class="title"><i class="fa fa-headset"></i> <span id="chatTitle">Ziyara Support</span></div>
+        <div class="d-flex align-items-center gap-2">
+          <button id="clearChatBtn" class="btn btn-sm btn-ghost"><i class="fa fa-broom me-1"></i>Clear</button>
+          <button id="closeChatBtn" class="btn-icon" aria-label="Close"><i class="fa fa-times"></i></button>
+        </div>
+      </div>
+
+      <div class="api-box">
+        <div class="small-muted">Gemini API Key:</div>
+        <input id="apiKeyInput" class="form-control form-control-sm" placeholder="Paste your Gemini API key or keep default…" />
+        <button id="saveKeyBtn" class="btn btn-sm btn-accent">Save</button>
+      </div>
+
+      <div id="chatBody" class="chat-body">
+        <div class="msg system">You’re chatting with the Ziyara Support Assistant. Ask about registrations, passes, events, or troubleshooting.</div>
+      </div>
+
+      <div class="chat-footer">
+        <textarea id="chatInput" class="form-control chat-input" placeholder="Type your message…"></textarea>
+        <button id="sendBtn" class="btn btn-accent"><i class="fa fa-paper-plane me-2"></i>Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       NEW: Register Popup (no structure change)
+       ========================================= -->
+  <div id="regBackdrop" class="reg-backdrop"></div>
+  <div id="regModal" class="reg-modal" role="dialog" aria-modal="true" aria-labelledby="regTitle">
+    <div class="reg-card">
+      <div class="reg-header">
+        <div class="title fw-bold"><i class="fa fa-id-card-clip me-2"></i><span id="regTitle">Register for Event</span></div>
+        <button id="regCloseBtn" class="btn-icon" aria-label="Close register form"><i class="fa fa-times"></i></button>
+      </div>
+      <div class="reg-body">
+        <form id="regForm">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label small-muted">Full Name <span class="text-warning">*</span></label>
+              <input id="regName" class="form-control form-control-sm" required />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small-muted">Ziyara ID (auto)</label>
+              <input id="regZyId" class="form-control form-control-sm" disabled />
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label small-muted">Event</label>
+              <input id="regEvent" class="form-control form-control-sm" disabled />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small-muted">Date & Time</label>
+              <input id="regWhen" class="form-control form-control-sm" disabled />
+            </div>
+
+            <div class="col-md-12 d-flex align-items-center gap-3">
+              <div class="photo-preview" id="photoPreview"><span class="help-tiny">Photo</span></div>
+              <div class="flex-grow-1">
+                <label class="form-label small-muted">Upload Photo (required)</label>
+                <input id="regPhoto" type="file" accept="image/*" class="form-control form-control-sm" required />
+                <div class="help-tiny mt-1">Square or portrait photo recommended. This appears on the pass.</div>
+              </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+              <button type="button" class="btn btn-ghost btn-sm" id="regCancel">Cancel</button>
+              <button type="submit" class="btn btn-accent btn-sm"><i class="fa fa-check me-1"></i>Submit & Register</button>
+            </div>
+          </div>
+
+          <!-- hidden/current event id holder -->
+          <input type="hidden" id="regEventId" />
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden working elements for pass generation -->
+  <div id="qrTemp"></div>
+  <canvas id="passCanvas" width="600" height="900"></canvas>
+
+  <!-- SCRIPT -->
+  <script>
+    /***************
+     *  SAMPLE DATA
+     *  Replace these arrays with API calls or dynamic data.
+     ***************/
+    const upcomingEvents = [
+      { id:1, title:"Orientation Day", date:"2025-10-20", time:"10:00", location:"Hall A", slots:120 },
+      { id:2, title:"Cloud Workshop", date:"2025-11-02", time:"14:00", location:"Lab 3", slots:40 },
+      { id:3, title:"Tech Talk: AI Ethics", date:"2025-11-15", time:"11:00", location:"Auditorium", slots:80 },
+      { id:4, title:"Community Meet", date:"2025-12-01", time:"17:00", location:"Cafeteria", slots:60 },
+      /* ✨ ADDED MORE EVENTS */
+      { id:5, title:"Design Sprint 2025", date:"2025-12-10", time:"09:00", location:"Innovation Hub", slots:50 },
+      { id:6, title:"Ziyara Cloud Expo", date:"2025-12-18", time:"15:00", location:"Tech Park", slots:120 },
+      { id:7, title:"Security Bootcamp", date:"2026-01-08", time:"10:00", location:"Hall B", slots:40 },
+      { id:8, title:"DevOps Hands-on", date:"2026-01-20", time:"13:00", location:"Lab 5", slots:35 },
+      { id:9, title:"Kubernetes 101", date:"2026-02-05", time:"11:00", location:"Lab 2", slots:45 },
+      { id:10, title:"AI for Cloud Ops", date:"2026-02-18", time:"16:00", location:"Auditorium", slots:90 }
+    ];
+
+    let myEvents = [
+      { id:101, title:"Cloud Workshop", date:"2025-11-02", time:"14:00", location:"Lab 3", status:"Registered" },
+      { id:102, title:"Orientation Day", date:"2025-10-20", time:"10:00", location:"Hall A", status:"Registered" }
+    ];
+
+    let notifications = [
+      { id:201, title:"Event Reminder", body:"Cloud Workshop starts in 2 days. Check-in instructions available.", unread:true, time:"1h ago" },
+      { id:202, title:"Pass Approved", body:"Your visitor pass for Orientation Day has been approved.", unread:true, time:"2d ago" },
+      { id:203, title:"New Event", body:"Tech Talk: AI Ethics added to upcoming events.", unread:false, time:"3d ago" }
+    ];
+
+    /***************
+     * Utilities
+     ***************/
+    const el = (s) => document.querySelector(s);
+    const els = (s) => Array.from(document.querySelectorAll(s));
+
+    // username from localStorage helper
+    function loadUserFromLocalStorage(){
+      // try a few common keys used in apps
+      let raw = localStorage.getItem('ziyara_user') || localStorage.getItem('user') || localStorage.getItem('username') || null;
+      if(!raw) return null;
+      try {
+        // might be JSON string or simple string
+        const parsed = JSON.parse(raw);
+        if(parsed && typeof parsed === 'object') return parsed;
+      } catch(e){ /* not JSON, treat as simple string */ }
+      // if raw isn't JSON, return as object with displayName
+      return { displayName: raw, email: localStorage.getItem('user_email') || '' };
+    }
+
+    // fallback user
+    const fallbackUser = { displayName: 'Mukesh', email: 'mukesh@ziyara' };
+
+    // initialize UI with user data
+    function initUser() {
+      const u = loadUserFromLocalStorage() || fallbackUser;
+      const name = u.displayName || u.name || fallbackUser.displayName;
+      const email = u.email || u.emailAddress || fallbackUser.email;
+
+      el('#sidebarName').textContent = name;
+      el('#sidebarSignedEmail').textContent = email;
+      el('#sidebarEmail').textContent = email;
+      el('#welcomeTitle').textContent = `Welcome back, ${name}`;
+      el('#sidebarAvatar').textContent = (name||'U').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+
+      // fill settings form
+      el('#inputName').value = name;
+      el('#inputEmail').value = email;
+    }
+
+    /***************
+     * Pagination / view switching (single file SPA behavior)
+     ***************/
+    function activatePage(pageId){
+      // nav highlight
+      els('.nav-item').forEach(n=>{
+        n.classList.toggle('active', n.getAttribute('data-page') === pageId);
+      });
+      // page visibility
+      const pages = ['overview','my-events','upcoming','notifications','help','settings'];
+      pages.forEach(p=>{
+        const node = el('#page-' + p);
+        if(!node) return;
+        if(p === pageId) node.classList.add('active'); else node.classList.remove('active');
+      });
+      // focus behaviours
+      if(pageId === 'notifications') el('#globalSearch').focus();
+    }
+
+    // attach nav clicks
+    els('.nav-item').forEach(n=>{
+      n.addEventListener('click', ()=> activatePage(n.getAttribute('data-page')));
+    });
+
+    // also menu actions
+    el('[data-action="go-settings"]')?.addEventListener('click', (e)=>{
+      e.preventDefault();
+      activatePage('settings');
+    });
+
+    /***************
+     * Rendering functions
+     ***************/
+    function renderStats(){
+      el('#statMyEvents').textContent = myEvents.length;
+      el('#statUpcoming').textContent = upcomingEvents.length;
+      const unread = notifications.filter(x=>x.unread).length;
+      el('#statNotifs').textContent = unread;
+      const navCount = el('#navNotCount');
+      if(unread>0){ navCount.style.display='inline-block'; navCount.textContent = unread; } else navCount.style.display='none';
+
+      const passEl = el('#statPass');
+      // demo: if any registered event -> show active pass
+      passEl.textContent = myEvents.length>0 ? 'Active — Valid' : 'No active';
+    }
+
+    function renderOverviewLists(){
+      // history (my events)
+      const h = el('#historyArea');
+      h.innerHTML = '';
+      if(myEvents.length===0) h.innerHTML = '<div class="muted">No events yet</div>';
+      myEvents.forEach(ev=>{
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `<div>
+                            <div style="font-weight:700">${ev.title}</div>
+                            <div class="muted">${ev.date} • ${ev.time} • ${ev.location}</div>
+                          </div>
+                          <div style="text-align:right">
+                            <div class="event-badge">${ev.status}</div>
+                            <div class="small-muted" style="margin-top:8px">ID: ${ev.id}</div>
+                          </div>`;
+        h.appendChild(item);
+      });
+
+      // upcoming (short)
+      const up = el('#upcomingArea');
+      up.innerHTML = '';
+      upcomingEvents.slice(0,4).forEach(ev=>{
+        const item = document.createElement('div');
+        item.className = 'list-item';
+        item.innerHTML = `<div>
+                            <div style="font-weight:700">${ev.title}</div>
+                            <div class="muted">${ev.date} • ${ev.time} • ${ev.location}</div>
+                          </div>
+                          <div class="small-muted">${ev.slots} slots</div>`;
+        up.appendChild(item);
+      });
+
+      // quick notifs
+      const qn = el('#quickNotifs');
+      qn.innerHTML = '';
+      notifications.slice(0,3).forEach(n=>{
+        const div = document.createElement('div');
+        div.className = 'notif' + (n.unread ? ' unread' : '');
+        div.innerHTML = `<div style="width:36px; text-align:center; font-size:1.05rem; color:var(--accent)"><i class="fa fa-bell"></i></div>
+                         <div style="flex:1">
+                           <div style="font-weight:700">${n.title} <span class="small-muted" style="font-weight:600">• ${n.time}</span></div>
+                           <div class="muted">${n.body}</div>
+                         </div>`;
+        qn.appendChild(div);
+      });
+    }
+
+    function renderMyEvents(){
+      const area = el('#myEventsArea');
+      area.innerHTML = '';
+      if(myEvents.length===0){
+        area.innerHTML = '<div class="muted">You have not registered for any events.</div>';
+        return;
+      }
+      myEvents.forEach(ev=>{
+        const d = document.createElement('div');
+        d.className = 'list-item';
+        d.innerHTML = `<div>
+                        <div style="font-weight:700">${ev.title}</div>
+                        <div class="muted">${ev.date} • ${ev.time} • ${ev.location}</div>
+                       </div>
+                       <div style="text-align:right">
+                         <div class="event-badge">${ev.status}</div>
+                         <div class="mt-2 d-flex gap-2 justify-content-end">
+                           <button class="btn btn-sm btn-outline-light" onclick="downloadPass(${ev.id})">Pass</button>
+                           <button class="btn btn-sm btn-ghost" onclick="cancelRegistration(${ev.id})">Cancel</button>
+                         </div>
+                       </div>`;
+        area.appendChild(d);
+      });
+    }
+
+    function renderBrowse(){
+      const area = el('#browseArea');
+      area.innerHTML = '';
+      upcomingEvents.forEach(ev=>{
+        const d = document.createElement('div');
+        d.className = 'list-item';
+        d.innerHTML = `<div>
+                        <div style="font-weight:700">${ev.title}</div>
+                        <div class="muted">${ev.date} • ${ev.time} • ${ev.location}</div>
+                       </div>
+                       <div style="text-align:right">
+                         <div class="small-muted">${ev.slots} slots</div>
+                         <div class="mt-2">
+                           <button class="btn btn-sm btn-accent" onclick="registerFor(${ev.id})">Register</button>
+                         </div>
+                       </div>`;
+        area.appendChild(d);
+      });
+    }
+
+    function renderNotifications(){
+      const area = el('#notifArea');
+      area.innerHTML = '';
+      if(notifications.length===0) { area.innerHTML = '<div class="muted">No notifications</div>'; return; }
+      notifications.forEach(n=>{
+        const d = document.createElement('div');
+        d.className = 'notif' + (n.unread ? ' unread' : '');
+        d.style.marginBottom = '8px';
+        d.innerHTML = `<div style="width:36px;text-align:center;color:var(--accent)"><i class="fa fa-bell"></i></div>
+                       <div style="flex:1">
+                         <div style="font-weight:700">${n.title} <span class="small-muted" style="font-weight:600">• ${n.time}</span></div>
+                         <div class="muted">${n.body}</div>
+                       </div>
+                       <div style="display:flex;flex-direction:column;gap:6px">
+                         ${
+                           // Show Download button if notification contains passData
+                           n.passData
+                           ? `<button class="btn btn-sm btn-accent" onclick="downloadPassFromNotif(${n.id})"><i class="fa fa-id-card"></i> Download Pass</button>`
+                           : ''
+                         }
+                         <button class="btn btn-sm btn-outline-light" onclick="markRead(${n.id})">Mark</button>
+                         <button class="btn btn-sm btn-ghost" onclick="dismiss(${n.id})"><i class="fa fa-times"></i></button>
+                       </div>`;
+        area.appendChild(d);
+      });
+    }
+
+    /***************
+     * Actions
+     ***************/
+    // NEW: open registration modal for selected event
+    function registerFor(id){
+      const ev = upcomingEvents.find(e=>e.id===id); if(!ev) return;
+      // If already registered for same title, still allow separate registration? Keep previous behavior: block duplicates.
+      if(myEvents.some(m=>m.title===ev.title)){ alert('Already registered'); return; }
+      openRegModal(ev);
+    }
+
+    function cancelRegistration(id){
+      if(!confirm('Cancel registration?')) return;
+      myEvents = myEvents.filter(e=>e.id!==id);
+      rerenderAll();
+      toast('Registration cancelled');
+    }
+
+    // UPDATED: generate and download pass PDF
+    async function downloadPass(id){
+      const ev = myEvents.find(e=>e.id===id);
+      if(!ev){ alert('Event not found'); return; }
+
+      // Ensure we have guest info and photo
+      if(!ev.guest || !ev.guest.name || !ev.guest.zyId || !ev.guest.photoDataUrl){
+        alert('Guest details missing for this registration. Please re-register to add photo & name.');
+        return;
+      }
+      await generatePassPDF({
+        name: ev.guest.name,
+        zyId: ev.guest.zyId,
+        event: ev.title,
+        date: ev.date,
+        time: ev.time,
+        photoDataUrl: ev.guest.photoDataUrl
+      });
+    }
+
+    function markRead(id){
+      notifications = notifications.map(n => n.id===id ? {...n, unread:false} : n);
+      rerenderAll();
+    }
+    function dismiss(id){
+      notifications = notifications.filter(n=>n.id!==id);
+      rerenderAll();
+    }
+    function markAllRead(){
+      notifications = notifications.map(n=>({...n, unread:false}));
+      rerenderAll();
+    }
+    function clearAll(){
+      if(!confirm('Clear all notifications?')) return;
+      notifications = [];
+      rerenderAll();
+    }
+
+    // small transient toast
+    function toast(msg){
+      const node = document.createElement('div');
+      node.textContent = msg;
+      Object.assign(node.style,{position:'fixed',right:'18px',bottom:'18px',padding:'10px 14px',background:'rgba(0,0,0,0.7)',color:'#fff',borderRadius:'10px',zIndex:99999,transition:'opacity .5s'});
+      document.body.appendChild(node);
+      setTimeout(()=> node.style.opacity='0',1600);
+      setTimeout(()=> node.remove(),2200);
+    }
+
+    // rerender everything visible
+    function rerenderAll(){
+      renderStats();
+      renderOverviewLists();
+      renderMyEvents();
+      renderBrowse();
+      renderNotifications();
+    }
+
+    /***************
+     * Settings form
+     ***************/
+    el('#settingsForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const name = el('#inputName').value.trim();
+      const email = el('#inputEmail').value.trim();
+      // persist to localStorage (simulate saving profile)
+      localStorage.setItem('username', name);
+      localStorage.setItem('user_email', email);
+      localStorage.setItem('ziyara_user', JSON.stringify({ displayName: name, email }));
+      initUser();
+      toast('Profile saved');
+    });
+
+    el('#resetProfile').addEventListener('click', ()=>{
+      // reset to stored or fallback
+      const u = loadUserFromLocalStorage() || fallbackUser;
+      el('#inputName').value = u.displayName || fallbackUser.displayName;
+      el('#inputEmail').value = u.email || fallbackUser.email;
+      toast('Reset profile fields');
+    });
+
+    /***************
+     * Theme & small UI bits
+     ***************/
+    el('#themeBtn').addEventListener('click', ()=>{
+      document.body.classList.toggle('light-theme');
+      // quick toggle visual — not full light theme; you can extend this
+      if(document.body.classList.contains('light-theme')) {
+        el('#themeBtn').innerHTML = '<i class="fa fa-moon me-2"></i>Dark';
+      } else {
+        el('#themeBtn').innerHTML = '<i class="fa fa-sun me-2"></i>Theme';
+      }
+    });
+
+    // logout
+    el('#logoutBtn').addEventListener('click', () => {
+      if (confirm('Sign out?')) {
+        // Clear stored user info
+        localStorage.removeItem('ziyara_user');
+        localStorage.removeItem('username');
+        localStorage.removeItem('user_email');
+
+        // Optional: also clear Gemini key if you want
+        localStorage.removeItem('gemini_api_key');
+
+        // Redirect to login page
+        window.location.href = 'login.html';
+      }
+    });
+    el('#signOut').addEventListener('click', () => el('#logoutBtn').click());
+
+    /***************
+     * Search
+     ***************/
+    el('#globalSearch').addEventListener('input', (e)=>{
+      const q = e.target.value.toLowerCase().trim();
+      if(q===''){ rerenderAll(); return; }
+      el('#upcomingArea').innerHTML = '';
+      upcomingEvents.filter(ev=> ev.title.toLowerCase().includes(q) || ev.location.toLowerCase().includes(q)).forEach(ev=>{
+        const it = document.createElement('div'); it.className='list-item';
+        it.innerHTML = `<div><div style="font-weight:700">${ev.title}</div><div class="muted">${ev.date} • ${ev.time} • ${ev.location}</div></div><div class="small-muted">${ev.slots} slots</div>`;
+        el('#upcomingArea').appendChild(it);
+      });
+      el('#historyArea').innerHTML = '';
+      myEvents.filter(ev=> ev.title.toLowerCase().includes(q) || ev.location.toLowerCase().includes(q)).forEach(ev=>{
+        const it = document.createElement('div'); it.className='list-item';
+        it.innerHTML = `<div><div style="font-weight:700">${ev.title}</div><div class="muted">${ev.date} • ${ev.time} • ${ev.location}</div></div><div class="event-badge">${ev.status}</div>`;
+        el('#historyArea').appendChild(it);
+      });
+      el('#notifArea').innerHTML = '';
+      notifications.filter(n=> n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q)).forEach(n=>{
+        const it = document.createElement('div'); it.className='notif' + (n.unread?' unread':'');
+        it.innerHTML = `<div style="width:36px;text-align:center;color:var(--accent)"><i class="fa fa-bell"></i></div><div style="flex:1"><div style="font-weight:700">${n.title} <span class="small-muted">• ${n.time}</span></div><div class="muted">${n.body}</div></div>`;
+        el('#notifArea').appendChild(it);
+      });
+    });
+
+    /***************
+     * Help
+     ***************/
+    function openHelp(type){
+      if(type==='chat'){ openChatModal(); }
+      else if(type==='faq'){ alert('FAQ:\n1) Register by clicking Register.\n2) Create pass in My Events.\n3) Contact support from Help.'); }
+      else alert('User guide (demo).');
+    }
+    window.openHelp = openHelp;
+
+    /********************************************
+     * Gemini Chat — centered modal logic
+     ********************************************/
+    const DEFAULT_GEMINI_KEY = 'AIzaSyCLdtMYY70ISdObedCl05Gsy6Fl-HiicIg'; // demo default
+    const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
+
+    let chatHistory = []; // {role:'user'|'model', text:'...'}
+    const sysPrompt =
+`You are the Ziyara Support Assistant. Be concise, friendly, and helpful.
+You can help with:
+- registering for events, canceling, and passes,
+- viewing notifications,
+- basic troubleshooting on the portal.
+If asked to perform an action, explain the steps the user can take in this UI.`;
+
+    function getApiKey(){
+      return localStorage.getItem('gemini_api_key') || DEFAULT_GEMINI_KEY || '';
+    }
+
+    function saveApiKey(key){
+      localStorage.setItem('gemini_api_key', key.trim());
+    }
+
+    function openChatModal(){
+      el('#apiKeyInput').value = getApiKey();
+      el('#chatBackdrop').style.display = 'block';
+      el('#chatModal').style.display = 'flex';
+      el('#chatInput').focus();
+    }
+
+    function closeChatModal(){
+      el('#chatBackdrop').style.display = 'none';
+      el('#chatModal').style.display = 'none';
+    }
+
+    function appendMessage(role, text){
+      const node = document.createElement('div');
+      node.className = 'msg ' + (role === 'user' ? 'user' : (role === 'system' ? 'system' : 'bot'));
+      node.textContent = text;
+      el('#chatBody').appendChild(node);
+      el('#chatBody').scrollTop = el('#chatBody').scrollHeight;
+    }
+
+    function setLoading(isLoading){
+      el('#sendBtn').disabled = isLoading;
+      el('#sendBtn').innerHTML = isLoading ? '<i class="fa fa-spinner fa-spin me-2"></i>Sending' : '<i class="fa fa-paper-plane me-2"></i>Send';
+    }
+
+    async function sendToGemini(userText){
+      const apiKey = getApiKey();
+      if(!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE'){
+        appendMessage('system', 'Please paste a valid Gemini API key above and press Save.');
+        return;
+      }
+
+      const recent = chatHistory.slice(-8);
+      const contents = [];
+      contents.push({ role: "user", parts: [{ text: sysPrompt }] });
+      for(const turn of recent){
+        if(turn.role === 'user'){
+          contents.push({ role: "user", parts: [{ text: turn.text }] });
+        } else {
+          contents.push({ role: "model", parts: [{ text: turn.text }] });
+        }
+      }
+      contents.push({ role: "user", parts: [{ text: userText }] });
+
+      const body = { contents };
+
+      const res = await fetch(GEMINI_ENDPOINT + '?key=' + encodeURIComponent(apiKey), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if(!res.ok){
+        const t = await res.text().catch(()=> '');
+        throw new Error('Gemini API error: ' + res.status + ' ' + t);
+      }
+
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || 'Sorry, I could not generate a response.';
+      return text;
+    }
+
+    async function handleSend(){
+      const input = el('#chatInput');
+      const text = input.value.trim();
+      if(!text) return;
+
+      appendMessage('user', text);
+      chatHistory.push({ role:'user', text });
+
+      input.value = '';
+      setLoading(true);
+
+      try{
+        const reply = await sendToGemini(text);
+        appendMessage('model', reply);
+        chatHistory.push({ role:'model', text: reply });
+      }catch(err){
+        console.error(err);
+        appendMessage('system', 'Error: ' + (err?.message || 'Unknown error'));
+      }finally{
+        setLoading(false);
+        input.focus();
+      }
+    }
+
+    // Wire chat modal controls
+    el('#closeChatBtn').addEventListener('click', closeChatModal);
+    el('#chatBackdrop').addEventListener('click', closeChatModal);
+    el('#sendBtn').addEventListener('click', handleSend);
+    el('#chatInput').addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        handleSend();
+      }
+    });
+    el('#saveKeyBtn').addEventListener('click', ()=>{
+      const k = el('#apiKeyInput').value.trim();
+      if(!k){ alert('Please paste a valid Gemini API key.'); return; }
+      saveApiKey(k);
+      toast('API key saved locally');
+      el('#apiKeyInput').blur();
+    });
+    el('#clearChatBtn').addEventListener('click', ()=>{
+      chatHistory = [];
+      el('#chatBody').innerHTML = '<div class="msg system">Chat cleared. Ask anything about Ziyara.</div>';
+      el('#chatInput').focus();
+    });
+
+    /********************************************
+     * NEW: Registration modal logic + Pass PDF
+     ********************************************/
+    let currentRegisterEvent = null;
+    const regBackdrop = el('#regBackdrop');
+    const regModal = el('#regModal');
+    const regPhoto = el('#regPhoto');
+    const photoPreview = el('#photoPreview');
+
+    function genZyId(){
+      return 'ZY' + (Math.floor(Math.random()*9000)+1000);
+    }
+
+    function openRegModal(ev){
+      currentRegisterEvent = ev;
+      el('#regEventId').value = ev.id;
+      el('#regEvent').value = ev.title;
+      el('#regWhen').value = `${ev.date} • ${ev.time}`;
+      const zy = genZyId();
+      el('#regZyId').value = zy;
+
+      /* 🔧 FIX: Do NOT prefill name from profile anymore */
+      el('#regName').value = '';
+
+      // reset photo preview
+      photoPreview.innerHTML = '<span class="help-tiny">Photo</span>';
+      regPhoto.value = '';
+
+      regBackdrop.style.display = 'block';
+      regModal.style.display = 'flex';
+    }
+    function closeRegModal(){
+      regBackdrop.style.display = 'none';
+      regModal.style.display = 'none';
+    }
+    el('#regCloseBtn').addEventListener('click', closeRegModal);
+    el('#regCancel').addEventListener('click', closeRegModal);
+    regBackdrop.addEventListener('click', closeRegModal);
+
+    // Live photo preview
+    regPhoto.addEventListener('change', ()=>{
+      const file = regPhoto.files?.[0];
+      if(!file) { photoPreview.innerHTML = '<span class="help-tiny">Photo</span>'; return; }
+      const reader = new FileReader();
+      reader.onload = e=>{
+        const img = new Image();
+        img.onload = ()=>{
+          photoPreview.innerHTML = '';
+          photoPreview.appendChild(img);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Handle submit
+    el('#regForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = el('#regName').value.trim();
+      const zyId = el('#regZyId').value.trim();
+      if(!name){ alert('Please enter full name.'); return; }
+      const file = regPhoto.files?.[0];
+      if(!file){ alert('Please upload a photo.'); return; }
+
+      // read photo as dataURL
+      const photoDataUrl = await new Promise((resolve,reject)=>{
+        const r = new FileReader();
+        r.onload = ()=> resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
+
+      // Add to myEvents
+      const ev = currentRegisterEvent;
+      const newId = Math.floor(Math.random()*900)+300;
+      myEvents.unshift({
+        id: newId,
+        title: ev.title,
+        date: ev.date,
+        time: ev.time,
+        location: ev.location,
+        status: 'Registered',
+        guest: { name, zyId, photoDataUrl }
+      });
+
+      // Notify — store passData for later download
+      notifications.unshift({
+        id: Date.now(),
+        title:'Pass Generated',
+        body:`Your pass for ${ev.title} is ready. Click to download anytime.`,
+        unread:true,
+        time:'just now',
+        passData: {
+          name, zyId, event: ev.title, date: ev.date, time: ev.time, photoDataUrl, issuedAt: new Date().toISOString(), eventId: newId
+        }
+      });
+
+      rerenderAll();
+      closeRegModal();
+      toast(`Registered: ${ev.title}`);
+      activatePage('notifications');
+    });
+
+    // Download from Notifications — keep name
+    async function downloadPassFromNotif(notifId){
+      const n = notifications.find(x=>x.id===notifId);
+      if(!n || !n.passData){ alert('Pass data not found in this notification.'); return; }
+      await generatePassPDF(n.passData);
+    }
+    window.downloadPassFromNotif = downloadPassFromNotif;
+
+    // Create small-card PDF (300x480 pt ~ 3.75in x 6.67in)
+    async function generatePassPDF({ name, zyId, event, date, time, photoDataUrl }){
+      // Prepare canvas
+      const canvas = el('#passCanvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width = 600;   // 600x900 px working surface
+      const H = canvas.height = 900;
+
+      // Background
+      const grd = ctx.createLinearGradient(0,0,0,H);
+      grd.addColorStop(0,'#1b1027');
+      grd.addColorStop(1,'#2a1840');
+      ctx.fillStyle = grd;
+      ctx.fillRect(0,0,W,H);
+
+      // Accent top arc
+      ctx.fillStyle = 'rgba(124,58,237,0.18)';
+      ctx.beginPath();
+      ctx.arc(W/2, -220, 400, 0, Math.PI*2);
+      ctx.fill();
+
+      // Card border
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(18,18,W-36,H-36);
+
+      // Header "Ziyara Visitor Pass"
+      ctx.fillStyle = '#ffd700';
+      ctx.font = 'bold 28px Poppins, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Ziyara Visitor Pass', W/2, 60);
+
+      // Photo (top center)
+      const photo = await loadImage(photoDataUrl);
+      const PHOTO_W = 220, PHOTO_H = 220;
+      const px = (W - PHOTO_W)/2, py = 90;
+      // photo frame
+      roundRect(ctx, px-6, py-6, PHOTO_W+12, PHOTO_H+12, 16, 'rgba(255,255,255,0.1)');
+      ctx.drawImage(photo, px, py, PHOTO_W, PHOTO_H);
+
+      // Name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 32px Poppins, Arial';
+      ctx.fillText(name, W/2, py + PHOTO_H + 48);
+
+      // Ziyara ID
+      ctx.fillStyle = '#d4c1ff';
+      ctx.font = '600 22px Poppins, Arial';
+      ctx.fillText(`Ziyara ID: ${zyId}`, W/2, py + PHOTO_H + 80);
+
+      // Event + Date/Time
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px Poppins, Arial';
+      ctx.fillText(`Event: ${event}`, W/2, py + PHOTO_H + 120);
+
+      ctx.fillStyle = '#eae7f6';
+      ctx.font = '500 20px Poppins, Arial';
+      ctx.fillText(`Time: ${time}   Date: ${date}`, W/2, py + PHOTO_H + 150);
+
+      // QR Code (center mid)
+      const qrData = JSON.stringify({
+        name, zyId, event, time, date, issuedAt: new Date().toISOString()
+      });
+      const qrCanvas = await makeQRCode(qrData, 220);
+      const qrX = (W-220)/2, qrY = py + PHOTO_H + 190;
+      // subtle QR frame
+      roundRect(ctx, qrX-10, qrY-10, 240, 240, 16, 'rgba(255,255,255,0.08)');
+      ctx.drawImage(qrCanvas, qrX, qrY, 220, 220);
+
+      // Footer
+      ctx.fillStyle = '#bdaae9';
+      ctx.font = '500 16px Poppins, Arial';
+      ctx.fillText('Scan at entry. Valid for the registered event & time only.', W/2, H - 60);
+
+      // PDF (robust UMD usage)
+      const PDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : null;
+      if(!PDF){ alert('PDF library not loaded yet.'); return; }
+      const pdf = new PDF({ orientation:'portrait', unit:'pt', format:[300, 480] });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pageW = 300, pageH = 480;
+      const imgW = pageW - 16; // margins
+      const imgH = imgW * (H/W);
+      const offsetY = (pageH - imgH)/2;
+      pdf.addImage(imgData, 'PNG', 8, offsetY, imgW, imgH);
+      pdf.save(`Ziyara_Pass_${zyId}.pdf`);
+    }
+
+    // helpers
+    function roundRect(ctx, x, y, w, h, r, fillStyle){
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x+r,y);
+      ctx.arcTo(x+w,y,x+w,y+h,r);
+      ctx.arcTo(x+w,y+h,x,y+h,r);
+      ctx.arcTo(x,y+h,x,y,r);
+      ctx.arcTo(x,y,x+w,y,r);
+      ctx.closePath();
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+      ctx.restore();
+    }
+    function loadImage(src){
+      return new Promise((resolve, reject)=>{
+        const img = new Image();
+        img.onload = ()=> resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+    function makeQRCode(text, size=220){
+      return new Promise((resolve)=>{
+        const wrap = el('#qrTemp');
+        wrap.innerHTML = '';
+        const q = new QRCode(wrap, {
+          text, width:size, height:size, correctLevel: QRCode.CorrectLevel.M
+        });
+        // QRCode lib may render as img or canvas; normalize to canvas
+        setTimeout(()=>{
+          const c = wrap.querySelector('canvas');
+          if(c){ resolve(c); }
+          else {
+            const img = wrap.querySelector('img');
+            const cv = document.createElement('canvas');
+            cv.width = size; cv.height = size;
+            const cx = cv.getContext('2d');
+            const tmp = new Image();
+            tmp.onload = ()=>{ cx.drawImage(tmp,0,0,size,size); resolve(cv); };
+            tmp.src = img.src;
+          }
+        }, 50);
+      });
+    }
+
+    /***************
+     * Init
+     ***************/
+    function init(){
+      initUser();
+      rerenderAll();
+      activatePage('overview');
+
+      // attach notification buttons
+      el('#markAllRead').addEventListener('click', ()=>{ markAllRead(); });
+      el('#clearAll').addEventListener('click', ()=>{ clearAll(); });
+    }
+
+    // expose some actions for console
+    window.registerFor = registerFor;
+    window.cancelRegistration = cancelRegistration;
+    window.downloadPass = downloadPass;
+    window.markRead = markRead;
+    window.dismiss = dismiss;
+    window.clearAll = clearAll;
+
+    init();
+
+/* =============================================
+   Ziyara — Dynamic User Dashboard Logic
+   ============================================= */
+
+/***************
+ *  Data Setup
+ ***************/
+ let upcomingEvents = []; // you can load from API later
+let myEvents = JSON.parse(localStorage.getItem('ziyara_myEvents') || '[]');
+let notifications = JSON.parse(localStorage.getItem('ziyara_notifications') || '[]');
+
+/***************
+ * Helpers
+ ***************/
+const el2 = (s)=>document.querySelector(s); // avoid shadowing but keep structure
+const els2 = (s)=>Array.from(document.querySelectorAll(s));
+
+function saveAll(){
+  localStorage.setItem('ziyara_myEvents', JSON.stringify(myEvents));
+  localStorage.setItem('ziyara_notifications', JSON.stringify(notifications));
+}
+
+function toast2(msg){
+  const t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',right:'18px',bottom:'18px',padding:'10px 14px',background:'rgba(0,0,0,0.7)',color:'#fff',borderRadius:'10px',zIndex:99999});
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2000);
+}
+
+/***************
+ * User Info
+ ***************/
+const fallbackUser2 = {displayName:'Guest User',email:'guest@ziyara'};
+function loadUser2(){
+  try{return JSON.parse(localStorage.getItem('ziyara_user'))||fallbackUser2;}catch{return fallbackUser2;}
+}
+function initUser2(){
+  const u=loadUser2();
+  el2('#sidebarName').textContent=u.displayName;
+  el2('#sidebarEmail').textContent=u.email;
+  el2('#sidebarSignedEmail').textContent=u.email;
+  el2('#welcomeTitle').textContent=`Welcome back, ${u.displayName}`;
+  el2('#sidebarAvatar').textContent=u.displayName[0]?.toUpperCase()||'U';
+  el2('#inputName').value=u.displayName;
+  el2('#inputEmail').value=u.email;
+}
+
+/***************
+ * Rendering
+ ***************/
+function renderStats2(){
+  el2('#statMyEvents').textContent=myEvents.length;
+  const unread=notifications.filter(n=>n.unread).length;
+  el2('#statNotifs').textContent=unread;
+  el2('#navNotCount').style.display=unread>0?'inline-block':'none';
+  el2('#navNotCount').textContent=unread;
+  el2('#statPass').textContent=myEvents.length?'Active — Valid':'No active';
+}
+
+function renderMyEvents2(){
+  const area=el2('#myEventsArea'); area.innerHTML='';
+  if(!myEvents.length){area.innerHTML='<div class="muted">No events registered yet.</div>';return;}
+  myEvents.forEach(ev=>{
+    const div=document.createElement('div');
+    div.className='list-item';
+    div.innerHTML=`
+      <div>
+        <div style="font-weight:700">${ev.title}</div>
+        <div class="muted">${ev.date} • ${ev.time}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="event-badge">${ev.status}</div>
+        <div class="mt-2 d-flex gap-2 justify-content-end">
+          <button class="btn btn-sm btn-outline-light" onclick="downloadPassAlt('${ev.passId||''}')">Pass</button>
+        </div>
+      </div>`;
+    area.appendChild(div);
+  });
+}
+
+function renderNotifications2(){
+  const area=el2('#notifArea'); area.innerHTML='';
+  if(!notifications.length){area.innerHTML='<div class="muted">No notifications</div>';return;}
+  notifications.forEach(n=>{
+    const d=document.createElement('div');
+    d.className='notif'+(n.unread?' unread':'');
+    d.style.marginBottom='8px';
+    d.innerHTML=`
+      <div style="width:36px;text-align:center;color:var(--accent)"><i class="fa fa-bell"></i></div>
+      <div style="flex:1">
+        <div style="font-weight:700">${n.title} <span class="small-muted">• ${n.time}</span></div>
+        <div class="muted">${n.body}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${n.passData?`<button class="btn btn-sm btn-accent" onclick='viewPass(${JSON.stringify(n.passData)})'><i class="fa fa-id-card"></i> View</button>`:''}
+        <button class="btn btn-sm btn-outline-light" onclick="markRead2(${n.id})">Mark</button>
+        <button class="btn btn-sm btn-ghost" onclick="dismiss2(${n.id})"><i class="fa fa-times"></i></button>
+      </div>`;
+    area.appendChild(d);
+  });
+}
+
+function rerenderAll2(){renderStats2();renderMyEvents2();renderNotifications2();}
+
+/***************
+ * Actions
+ ***************/
+function registerFor2(eventData){
+  openRegModal2(eventData);
+}
+
+function cancelRegistration2(passId){
+  myEvents=myEvents.filter(e=>e.passId!==passId);
+  notifications=notifications.filter(n=>n?.passData?.passId!==passId);
+  saveAll();rerenderAll2();toast2('Registration cancelled');
+}
+
+function markRead2(id){
+  notifications=notifications.map(n=>n.id===id?{...n,unread:false}:n);
+  saveAll();rerenderAll2();
+}
+
+function dismiss2(id){
+  notifications=notifications.filter(n=>n.id!==id);
+  saveAll();rerenderAll2();
+}
+
+function markAllRead2(){notifications=notifications.map(n=>({...n,unread:false}));saveAll();rerenderAll2();}
+
+/***************
+ * Registration Modal
+ ***************/
+let currentRegisterEvent2=null;
+const regBackdrop2=el2('#regBackdrop'),regModal2=el2('#regModal');
+const regPhoto2=el2('#regPhoto'),photoPreview2=el2('#photoPreview');
+function genZyId2(){return 'ZY'+(Math.floor(Math.random()*9000)+1000);}
+function genPassId2(){return 'PASS-'+Math.random().toString(36).substring(2,9).toUpperCase();}
+
+function openRegModal2(ev){
+  currentRegisterEvent2=ev;
+  el2('#regEvent').value=ev.title;
+  el2('#regWhen').value=`${ev.date} • ${ev.time}`;
+  el2('#regZyId').value=genZyId2();
+
+  /* 🔧 FIX mirror: ensure empty name here too */
+  el2('#regName').value='';
+
+  regBackdrop2.style.display='block';regModal2.style.display='flex';
+}
+function closeRegModal2(){regBackdrop2.style.display='none';regModal2.style.display='none';}
+el2('#regCloseBtn').addEventListener('click',closeRegModal2);
+el2('#regCancel').addEventListener('click',closeRegModal2);
+regBackdrop2.addEventListener('click',closeRegModal2);
+
+// preview
+regPhoto2.addEventListener('change',()=>{
+  const f=regPhoto2.files?.[0];
+  if(!f){photoPreview2.innerHTML='<span class="help-tiny">Photo</span>';return;}
+  const r=new FileReader();r.onload=e=>{const img=new Image();img.src=e.target.result;photoPreview2.innerHTML='';photoPreview2.appendChild(img);};r.readAsDataURL(f);
+});
+
+el2('#regForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const name=el2('#regName').value.trim(), zyId=el2('#regZyId').value.trim();
+  const file=regPhoto2.files?.[0];
+  if(!name||!file)return alert('Please fill all fields and upload photo.');
+
+  const photoDataUrl=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});
+  const ev=currentRegisterEvent2; const passId=genPassId2();
+  const passData={passId,name,zyId,event:ev.title,date:ev.date,time:ev.time,photoDataUrl,issuedAt:new Date().toISOString()};
+
+  // Add to events
+  myEvents.unshift({passId,...ev,status:'Registered',guest:{name,zyId,photoDataUrl}});
+  // Notification
+  notifications.unshift({id:Date.now(),title:'Pass Generated',body:`Pass ${passId} for ${ev.title} created.`,unread:true,time:'just now',passData});
+  saveAll();rerenderAll2();closeRegModal2();toast2('Pass generated! Check notifications.');
+});
+
+/***************
+ * Pass Viewer / Download (alt block)
+ ***************/
+async function viewPass(data){
+  if(!data)return;
+  await generatePassPDF2(data);
+}
+window.viewPass=viewPass;
+
+async function downloadPassAlt(passId){
+  const e=myEvents.find(m=>m.passId===passId);
+  if(!e||!e.guest)return alert('Pass not found.');
+  await generatePassPDF2({
+    name:e.guest.name,zyId:e.guest.zyId,event:e.title,
+    date:e.date,time:e.time,photoDataUrl:e.guest.photoDataUrl,passId:e.passId
+  });
+}
+
+/***************
+ * PDF + QR (alt)
+ ***************/
+async function generatePassPDF2({name,zyId,event,date,time,photoDataUrl,passId}){
+  const canvas=el2('#passCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width=600,H=canvas.height=900;
+  const grd=ctx.createLinearGradient(0,0,0,H);
+  grd.addColorStop(0,'#1b1027');grd.addColorStop(1,'#2a1840');
+  ctx.fillStyle=grd;ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle='rgba(124,58,237,0.18)';ctx.beginPath();
+  ctx.arc(W/2,-220,400,0,Math.PI*2);ctx.fill();
+
+  ctx.fillStyle='#ffd700';ctx.font='bold 28px Poppins';ctx.textAlign='center';
+  ctx.fillText('Ziyara Visitor Pass',W/2,60);
+
+  const img=await loadImage(photoDataUrl);
+  const PX=(W-220)/2,PY=90;
+  ctx.drawImage(img,PX,PY,220,220);
+  ctx.fillStyle='#fff';ctx.font='bold 32px Poppins';ctx.fillText(name,W/2,PY+270);
+  ctx.fillStyle='#d4c1ff';ctx.font='600 20px Poppins';ctx.fillText(`ID: ${zyId}`,W/2,PY+300);
+  ctx.fillStyle='#fff';ctx.font='bold 20px Poppins';ctx.fillText(`Event: ${event}`,W/2,PY+330);
+  ctx.fillText(`Date: ${date}`,W/2,PY+360);
+  ctx.fillText(`Time: ${time}`,W/2,PY+390);
+  if(passId) ctx.fillText(`Pass ID: ${passId}`,W/2,PY+420);
+
+  const qrCanvas=await makeQRCode(JSON.stringify({name,zyId,event,date,time,passId}),200);
+  ctx.drawImage(qrCanvas,(W-200)/2,H-280,200,200);
+  ctx.fillStyle='#bdaae9';ctx.font='500 16px Poppins';
+  ctx.fillText('Scan at entry - Valid for registered event only',W/2,H-40);
+
+  const PDF = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : null;
+  if(!PDF){ alert('PDF library not loaded yet.'); return; }
+  const pdf=new PDF({orientation:'portrait',unit:'pt',format:[300,480]});
+  const imgData=canvas.toDataURL('image/png');
+  const pageW=300,imgW=pageW-16,imgH=imgW*(H/W),offsetY=(480-imgH)/2;
+  pdf.addImage(imgData,'PNG',8,offsetY,imgW,imgH);
+  pdf.save(`Ziyara_Pass_${zyId}.pdf`);
+}
+
+function loadImage2(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
+function makeQRCode2(text,size=200){
+  return new Promise(r=>{
+    const wrap=el2('#qrTemp');wrap.innerHTML='';
+    const q=new QRCode(wrap,{text,width:size,height:size});
+    setTimeout(()=>{const c=wrap.querySelector('canvas');r(c);},100);
+  });
+}
+
+/***************
+ * Init (alt)
+ ***************/
+function init2(){
+  initUser2();
+  renderStats2();renderMyEvents2();renderNotifications2();
+  activatePage('overview');
+  el2('#markAllRead').addEventListener('click',markAllRead2);
+}
+window.downloadPassAlt=downloadPassAlt;
+window.registerFor2=registerFor2;
+window.cancelRegistration2=cancelRegistration2;
+window.markRead2=markRead2;
+window.dismiss2=dismiss2;
+init2();
+
+
+  </script>
+
+  <!-- jsPDF & QRCode libraries (CDN) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

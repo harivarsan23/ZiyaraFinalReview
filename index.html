@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Ziyara — Cloud Management System</title>
+
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg1:#0c0615;
+  --bg2:#1a1028;
+  --accent:#7c3aed;
+  --accent-2:#a078ff;
+  --text:#eae7f6;
+  --muted:#cfc6e6cc;
+  --border:rgba(255,255,255,0.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  height:100%;
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));
+  color:var(--text);
+  overflow-x:hidden;
+}
+
+/* HEADER */
+header{
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 40px;
+  background:rgba(255,255,255,0.05);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:20;
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{width:38px;height:38px;border-radius:50%}
+.brand-name{font-weight:700;font-size:1.2rem}
+.nav-links{display:flex;gap:12px}
+.nav-links a{
+  padding:8px 18px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:500;
+  border:1px solid var(--border);background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(10px);
+  transition:0.3s ease;
+}
+.nav-links a:hover{
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  box-shadow:0 0 20px rgba(124,58,237,0.6);
+  color:#fff;transform:translateY(-2px);
+}
+
+/* FADE CAROUSEL — with deeper curved edges */
+.carousel{
+  position:relative;
+  width:100%;
+  height:75vh;
+  margin-top:-72px;
+  overflow:hidden;
+  z-index:1;
+  /* Smooth and more pronounced bottom curve */
+  clip-path: path("M0,0 H100% V80% C70% 105%,30% 105%,0 80% Z");
+}
+
+.carousel img{
+  position:absolute;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  top:0;
+  left:0;
+  opacity:0;
+  transition:opacity 1.5s ease-in-out;
+  filter:brightness(80%) contrast(105%);
+}
+.carousel img.active{
+  opacity:1;
+  z-index:2;
+}
+
+/* GLASS TEXT EFFECT */
+.carousel-text{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  z-index:5;
+}
+.carousel-text h1{
+  font-size:clamp(2.2rem,4vw,3.5rem);
+  font-weight:700;
+  color:rgba(255,255,255,0.9);
+  background:linear-gradient(135deg,rgba(255,255,255,0.8),rgba(255,255,255,0.2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  text-shadow:0 0 20px rgba(255,255,255,0.15);
+}
+.carousel-text p{
+  margin-top:10px;
+  font-size:1.1rem;
+  color:rgba(255,255,255,0.85);
+  text-shadow:0 0 8px rgba(0,0,0,0.4);
+}
+
+/* HERO */
+.hero{
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:60px 20px 40px;
+  position:relative;
+  z-index:10;
+  margin-top:-20px;
+}
+.logo-wrap{
+  width:130px;height:130px;border-radius:999px;
+  background:radial-gradient(60% 60% at 50% 40%,#ffffff12,transparent 70%);
+  box-shadow:0 0 0 6px #ffffff12,inset 0 0 30px #ffffff12;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:20px;
+  position:relative;
+}
+.logo-wrap::before{
+  content:"";position:absolute;inset:-25%;border-radius:999px;
+  background:radial-gradient(60% 60% at 50% 40%,#7c3aed50,transparent 70%);
+  filter:blur(20px);animation:aura 4s ease-in-out infinite;
+}
+@keyframes aura{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.08);opacity:1}}
+.logo-wrap img{width:90px;height:90px;border-radius:50%}
+.hero h1{font-size:clamp(36px,4vw,46px);font-weight:700;margin-top:10px;}
+.hero p{color:var(--muted);margin-top:5px;font-size:1.1rem;}
+
+/* CTA BUTTONS */
+.cta-row{
+  display:flex;justify-content:center;gap:18px;margin-top:30px;flex-wrap:wrap;
+}
+.btn{
+  padding:16px 40px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:linear-gradient(90deg,#2a1b46,#1d1433);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .25s ease;
+  font-size:1.05rem;
+  letter-spacing:.3px;
+  box-shadow:0 0 18px rgba(124,58,237,.25);
+}
+.btn:hover{
+  transform:translateY(-3px) scale(1.03);
+  background:linear-gradient(90deg,var(--accent),var(--accent-2));
+  box-shadow:0 0 30px rgba(124,58,237,.45);
+}
+
+/* FEATURES */
+.features{
+  display:flex;justify-content:center;gap:25px;flex-wrap:wrap;
+  margin-top:40px;padding:0 20px 60px;
+}
+.card{
+  width:260px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid var(--border);
+  backdrop-filter:blur(10px);
+  padding:26px 20px;
+  text-align:left;
+  transition:.3s ease;
+  box-shadow:0 10px 40px rgba(0,0,0,.45);
+}
+.card:hover{
+  transform:translateY(-6px);
+  border-color:var(--accent);
+  box-shadow:0 15px 50px rgba(124,58,237,.3);
+}
+.icon{font-size:32px;color:var(--accent-2);margin-bottom:10px;}
+.card h3{color:#fff;font-size:1.05rem;margin-bottom:6px;}
+.card p{color:var(--muted);font-size:.9rem;line-height:1.5;}
+
+/* FOOTER */
+footer{
+  text-align:center;
+  color:var(--muted);
+  padding:16px;
+  font-size:.9rem;
+  border-top:1px solid var(--border);
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(8px);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="Z.png" alt="Ziyara Logo">
+    <span class="brand-name">Ziyara</span>
+  </div>
+  <div class="nav-links">
+    <a href="#">About Us</a>
+    <a href="#">Get Help</a>
+  </div>
+</header>
+
+<!-- FADE CAROUSEL with deeper curve -->
+<div class="carousel" id="carousel">
+  <img src="smart.png" class="active" alt="Smart Insights">
+  <img src="visitor.png" alt="Visitor Management">
+  <img src="cloud.png" alt="Cloud & Infrastructure">
+  <img src="security.png" alt="Security & Permissions">
+  <img src="user.png" alt="User Experience">
+
+  <div class="carousel-text">
+    <h1>Empowering Connected Organizations</h1>
+    <p>Smart • Secure • Scalable</p>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="logo-wrap">
+    <img src="Z.png" alt="Ziyara Logo">
+  </div>
+  <h1>Welcome to Ziyara</h1>
+  <p>Where everyone feels expected</p>
+
+  <div class="cta-row">
+    <button class="btn" onclick="window.location.href='newlog.html'"><i class="fa fa-user"></i> Go to Dashboard</button>
+    <button class="btn" onclick="window.location.href='ourservice.html'"><i class="fa fa-gear"></i> Get Service</button>
+  </div>
+</section>
+
+<section class="features">
+  <div class="card"><div class="icon"><i class="fa fa-cloud"></i></div><h3>Cloud Hosting</h3><p>Spin up isolated organization servers instantly and toggle online/offline.</p></div>
+  <div class="card"><div class="icon"><i class="fa fa-city"></i></div><h3>Organization Management</h3><p>Super Admin, Admin, Security, and Reception roles preconfigured.</p></div>
+  <div class="card"><div class="icon"><i class="fa fa-shield-halved"></i></div><h3>Secure Access</h3><p>Audit trails, pass generation, and complete visibility for owners.</p></div>
+  <div class="card"><div class="icon"><i class="fa fa-chart-line"></i></div><h3>Analytics & Reports</h3><p>Event metrics and insights for better planning and performance.</p></div>
+</section>
+
+<footer>© 2025 Ziyara — Powered by Nuvexa</footer>
+
+<script>
+const images = document.querySelectorAll('.carousel img');
+let current = 0;
+const total = images.length;
+
+setInterval(() => {
+  images[current].classList.remove('active');
+  current = (current + 1) % total;
+  images[current].classList.add('active');
+}, 7000);
+</script>
+
+</body>
+</html>

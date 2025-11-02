@@ -1,0 +1,1065 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Ziyara — Owner Dashboard (v2)</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --accent:#7c3aed;
+      --accent-2:#9b5cf6;
+      --gold:#ffd700;
+      --glass-weak:rgba(255,255,255,0.03);
+      --muted-white:rgba(255,255,255,0.75);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:'Poppins',system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      min-height:100vh;
+      color:#eee;
+      -webkit-font-smoothing:antialiased;
+      background:
+        radial-gradient(circle at top left, rgba(124,58,237,0.25), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(160,120,255,0.25), transparent 60%),
+        linear-gradient(180deg, #0c0615 0%, #1a1028 100%);
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center;
+    }
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:0;
+      background:rgba(0,0,0,0.25);
+      backdrop-filter:blur(25px) saturate(130%);
+      pointer-events:none;
+    }
+  
+    .app{position:relative;z-index:1;display:flex;gap:1.25rem;padding:28px}
+  
+    .sidebar{
+      width:300px;min-width:220px;border-radius:14px;padding:18px;
+      background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.05);
+      backdrop-filter:blur(10px) saturate(140%);
+      box-shadow:0 0 25px rgba(124,58,237,0.25);
+      height:calc(100vh - 56px);
+      display:flex;flex-direction:column;justify-content:space-between;
+    }
+  
+    .logo-wrap{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    .logo-img{width:56px;height:56px;border-radius:12px;overflow:hidden;box-shadow:0 10px 26px rgba(124,58,237,0.25)}
+    .logo-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .app-title{font-weight:700;font-size:1.05rem;letter-spacing:.4px}
+    .app-sub{font-size:.82rem;color:var(--muted-white)}
+  
+    .profile{
+      display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;
+      background:rgba(255,255,255,0.04);margin-bottom:10px;
+      box-shadow:inset 0 0 10px rgba(124,58,237,0.15);
+    }
+    .avatar{
+      width:48px;height:48px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;
+    }
+    .profile .meta{font-size:.9rem;font-weight:600}
+  
+    .nav-list{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+    .nav-item{
+      display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;
+      color:var(--muted-white);cursor:pointer;transition:all .14s ease;
+    }
+    .nav-item .fa{width:24px;text-align:center;color:var(--accent)}
+    .nav-item:hover{
+      transform:translateY(-3px);
+      background:rgba(124,58,237,0.12);
+      color:#fff;
+    }
+    .nav-item.active{
+      background:linear-gradient(90deg,rgba(124,58,237,0.18),rgba(155,92,246,0.1));
+      box-shadow:0 0 15px rgba(124,58,237,0.25) inset;
+    }
+  
+    .sidebar .bottom{display:flex;flex-direction:column;gap:8px}
+    .small-muted{color:var(--muted-white);opacity:.9;font-size:.86rem}
+  
+    .main{flex:1;display:flex;flex-direction:column;gap:14px;min-width:0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .title{font-size:2rem;font-weight:800}
+    .subtitle{color:var(--muted-white);opacity:.9}
+    .search{min-width:280px;max-width:420px}
+  
+    .cards-row{display:flex;gap:12px;flex-wrap:wrap}
+    .card{
+      flex:1;min-width:220px;padding:14px;border-radius:12px;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.06);
+      backdrop-filter:blur(8px) saturate(130%);
+      box-shadow:0 0 25px rgba(124,58,237,0.15);
+    }
+    .card .kicker{font-size:.85rem;color:var(--gold);margin-bottom:8px}
+    .big-num{font-size:1.35rem;font-weight:800}
+  
+    .workspace{margin-top:6px;display:block;min-height:420px}
+    .page{display:none;opacity:0;transform:translateY(8px);transition:all .24s ease}
+    .page.active{display:block;opacity:1;transform:translateY(0)}
+  
+    .panel{
+      margin-top:10px;padding:14px;border-radius:12px;
+      background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03));
+      border:1px solid rgba(255,255,255,0.05);
+      box-shadow:0 0 25px rgba(124,58,237,0.2);
+    }
+  
+    .list-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;margin-bottom:8px;background:rgba(255,255,255,0.03)}
+    .badge-soft{padding:.35rem .6rem;border-radius:999px;background:rgba(124,58,237,0.15);color:var(--accent);font-weight:700}
+    .muted{color:var(--muted-white);font-size:.9rem}
+  
+    .btn-accent{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;border:none;
+      box-shadow:0 0 18px rgba(124,58,237,0.3);
+    }
+    .btn-ghost{
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--muted-white);
+    }
+    .btn-icon{
+      background:transparent;border:1px solid rgba(255,255,255,0.12);
+      color:#fff;border-radius:10px;height:40px;width:44px;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .btn-icon:hover{background:rgba(255,255,255,0.08)}
+  
+    .status-pill{padding:.45rem .7rem;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)}
+    .table-glass{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .table-glass thead th{font-size:.82rem;font-weight:700;color:var(--muted-white);opacity:.9}
+    .table-glass tbody tr{background:rgba(255,255,255,0.04)}
+    .table-glass tbody td{padding:10px 12px;vertical-align:middle}
+    .risk-low{color:#2ecc71}.risk-med{color:#f1c40f}.risk-high{color:#e74c3c}
+  
+    @media (max-width:1100px){
+      .sidebar{display:none}
+      .app{padding:16px}
+      .cards-row{flex-direction:column}
+    }
+  
+    /* Modal basics */
+    .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:none;z-index:9998}
+    .modal-wrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
+    .modal-card{
+      width:min(820px,95vw);max-height:82vh;overflow:auto;border-radius:16px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04));
+      backdrop-filter:blur(12px) saturate(140%);
+      box-shadow:0 30px 80px rgba(0,0,0,0.55);
+    }
+    .modal-head{
+      display:flex;align-items:center;justify-content:space-between;padding:12px 14px;
+      background:linear-gradient(90deg,rgba(124,58,237,0.25),rgba(155,92,246,0.12));
+      border-bottom:1px solid rgba(255,255,255,0.1);
+    }
+    .meter{height:10px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden}
+    .meter > div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+    .chip{border:1px solid rgba(255,255,255,0.14);padding:.15rem .5rem;border-radius:999px;font-size:.75rem}
+  </style>
+  
+</head>
+<body>
+<div class="app container-fluid">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="logo-wrap">
+        <div class="logo-img"><img src="z.png" alt="Z logo"></div>
+        <div>
+          <div class="app-title">Ziyara</div>
+          <div class="app-sub">Owner Console</div>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div class="avatar" id="sidebarAvatar">OW</div>
+        <div>
+          <div class="meta" id="sidebarName">Owner</div>
+          <div class="small-muted" id="sidebarEmail">owner@ziyara</div>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <div class="nav-item active" data-page="overview"><i class="fa fa-gauge-high"></i> System Overview</div>
+        <div class="nav-item" data-page="org-servers"><i class="fa fa-server"></i> Organization Servers</div>
+        <div class="nav-item" data-page="requests"><i class="fa fa-inbox"></i> Requests & Permissions</div>
+        <div class="nav-item" data-page="activity"><i class="fa fa-list-check"></i> Activity Log</div>
+        <div class="nav-item" data-page="ai-load"><i class="fa fa-brain"></i> AI Load & Statistics</div>
+        <div class="nav-item" data-page="settings"><i class="fa fa-gear"></i> Settings</div>
+      </nav>
+    </div>
+
+    <div class="bottom">
+      <div style="display:flex;gap:8px">
+        <button id="logoutBtn" class="btn btn-outline-light btn-sm w-50">Logout</button>
+        <button id="themeBtn" class="btn btn-accent btn-sm w-50"><i class="fa fa-sun me-2"></i>Theme</button>
+      </div>
+      <div style="margin-top:10px" class="small-muted">Signed in as</div>
+      <div style="font-weight:700" id="sidebarSignedEmail">owner@ziyara</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="title" id="welcomeTitle">Welcome back, Owner</div>
+        <div class="subtitle">Control center for orgs, servers, unified requests/permissions, and AI insights</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px">
+        <input id="globalSearch" class="form-control search form-control-sm" placeholder="Search orgs, requests, activity">
+        <div class="status-pill small-muted"><i class="fa fa-circle" style="color:#2ecc71;font-size:.6rem;margin-right:.6rem"></i> Online</div>
+        <div class="dropdown">
+          <button class="btn btn-ghost dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-user"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#" data-action="go-settings">Profile & Settings</a></li>
+            <li><a class="dropdown-item" href="#" id="signOut">Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <section class="cards-row">
+      <div class="card">
+        <div class="kicker">Total Orgs</div>
+        <div class="d-flex align-items-center justify-content-between">
+          <div><div class="big-num" id="statTotalOrgs">0</div><div class="muted">Connected organizations</div></div>
+          <div><i class="fa fa-diagram-project fa-2x"></i></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kicker">Online Servers</div>
+        <div class="d-flex align-items-center justify-content-between">
+          <div><div class="big-num" id="statOnline">0</div><div class="muted">Currently online</div></div>
+          <div><i class="fa fa-signal fa-2x"></i></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kicker">AI Load Index</div>
+        <div class="d-flex align-items-center justify-content-between">
+          <div><div class="big-num" id="statAiIndex">—</div><div class="muted">From AI load model</div></div>
+          <div><i class="fa fa-wave-square fa-2x"></i></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="kicker">Avg Server Risk</div>
+        <div class="d-flex align-items-center justify-content-between">
+          <div><div class="big-num" id="statAvgRisk">—</div><div class="muted">Low / Med / High</div></div>
+          <div><i class="fa fa-triangle-exclamation fa-2x"></i></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGES -->
+    <div class="workspace">
+      <!-- OVERVIEW (Control Center) -->
+      <section id="page-overview" class="page active">
+        <div class="panel">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0">System Overview</h5>
+            <div class="d-flex gap-2">
+              <button id="btnQuickInsights" class="btn btn-sm btn-accent"><i class="fa fa-wand-magic-sparkles me-1"></i>Run AI Insight</button>
+              <button id="btnMaintenance" class="btn btn-sm btn-ghost"><i class="fa fa-screwdriver-wrench me-1"></i>Maintenance Mode</button>
+              <button id="btnAllOffline" class="btn btn-sm btn-outline-light"><i class="fa fa-power-off me-1"></i>Toggle All Offline</button>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-lg-7">
+              <div class="panel">
+                <h6 class="m-0">Recent Events</h6>
+                <div id="overviewFeed" class="mt-2"></div>
+              </div>
+            </div>
+            <div class="col-lg-5 mt-3 mt-lg-0">
+              <div class="panel">
+                <h6 class="m-0">AI Weekly Summary</h6>
+                <div id="aiWeekly" class="muted mt-2">Click “Run AI Insight” for a concise weekly summary.</div>
+              </div>
+              <div class="panel mt-3">
+                <h6 class="m-0">Quick Health</h6>
+                <div id="quickHealth" class="mt-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ORG SERVERS -->
+      <section id="page-org-servers" class="page">
+        <div class="panel">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0">Organization Servers</h5>
+            <div class="d-flex gap-2">
+              <button id="btnRecalcHealth" class="btn btn-sm btn-ghost"><i class="fa fa-stethoscope me-1"></i>Recalculate Health</button>
+            </div>
+          </div>
+
+          <div class="table-responsive mt-3">
+            <table class="table-glass w-100">
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Server ID</th>
+                  <th>Status</th>
+                  <th>Uptime</th>
+                  <th>Risk</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orgTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REQUESTS & PERMISSIONS (Unified) -->
+      <section id="page-requests" class="page">
+        <div class="panel">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0">Requests & Permissions</h5>
+            <div class="d-flex gap-2 align-items-center">
+              <span class="chip">Unified Flow</span>
+              <button id="btnSeedRequest" class="btn btn-sm btn-ghost"><i class="fa fa-plus me-1"></i>Mock Request</button>
+            </div>
+          </div>
+          <div id="requestsArea" class="mt-3"></div>
+        </div>
+      </section>
+
+      <!-- ACTIVITY LOG -->
+      <section id="page-activity" class="page">
+        <div class="panel">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0">Owner Activity Log (last 30 days)</h5>
+            <div class="d-flex gap-2">
+              <button id="btnClearOld" class="btn btn-sm btn-ghost">Clear Old</button>
+              <button id="btnClearAllLogs" class="btn btn-sm btn-outline-light">Clear All</button>
+            </div>
+          </div>
+          <div id="activityList" class="mt-3"></div>
+        </div>
+      </section>
+
+      <!-- AI LOAD BALANCER & STATS -->
+      <section id="page-ai-load" class="page">
+        <div class="panel">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0">AI Load Balancer & Statistics</h5>
+            <div class="d-flex gap-2">
+              <button id="btnGenForecast" class="btn btn-sm btn-accent"><i class="fa fa-brain me-1"></i>Generate AI Forecast</button>
+              <button id="btnSimulateLoad" class="btn btn-sm btn-ghost"><i class="fa fa-chart-line me-1"></i>Simulate Load</button>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-lg-7">
+              <div class="panel">
+                <h6 class="m-0">Server Load (Last 14 intervals)</h6>
+                <div class="muted">Synthetic load data (0–100). Regenerate with “Simulate Load”.</div>
+                <div class="mt-3">
+                  <div class="meter"><div id="avgBar" style="width:0%"></div></div>
+                  <div class="d-flex justify-content-between small-muted mt-1">
+                    <span>Average</span><span id="avgVal">—</span>
+                  </div>
+                </div>
+                <div id="loadBars" class="mt-3"></div>
+              </div>
+            </div>
+            <div class="col-lg-5 mt-3 mt-lg-0">
+              <div class="panel">
+                <h6 class="m-0">AI Forecast</h6>
+                <div id="aiForecast" class="muted mt-2">Click “Generate AI Forecast” to produce a predictive summary (Gemini).</div>
+              </div>
+              <div class="panel mt-3">
+                <h6 class="m-0">Recommendations</h6>
+                <ul id="aiRecs" class="mt-2" style="padding-left:18px"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="page-settings" class="page">
+        <div class="panel">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0">Settings</h5>
+            <div class="small-muted">Profile & data</div>
+          </div>
+
+          <form id="settingsForm" class="mt-3">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label small-muted">Display name</label>
+                <input id="inputName" class="form-control form-control-sm"/>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small-muted">Email</label>
+                <input id="inputEmail" class="form-control form-control-sm"/>
+              </div>
+              <div class="col-md-12"><hr/></div>
+            
+              <div class="col-md-12"><hr/></div>
+              <div class="col-md-4">
+                <label class="form-label small-muted">EmailJS Public Key</label>
+                <input id="inputEjp" class="form-control form-control-sm" placeholder="PUBLIC KEY"/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small-muted">EmailJS Service ID</label>
+                <input id="inputEjs" class="form-control form-control-sm" placeholder="SERVICE ID"/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small-muted">EmailJS Template ID</label>
+                <input id="inputEjt" class="form-control form-control-sm" placeholder="TEMPLATE ID"/>
+              </div>
+              <div class="col-md-12 d-flex justify-content-end gap-2 mt-2">
+                <button id="btnSaveEmailJS" type="button" class="btn btn-ghost btn-sm">Save EmailJS</button>
+                <button class="btn btn-outline-light btn-sm" type="button" id="btnResetData"><i class="fa fa-trash-can me-1"></i>Clear All Data</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+
+    <footer class="small-muted">© Ziyara — Powered By Nuvexa</footer>
+  </main>
+</div>
+
+<!-- ORG ACTIVITY MODAL -->
+<div id="orgModalBack" class="modal-back"></div>
+<div id="orgModal" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="orgTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="title fw-bold"><i class="fa fa-clipboard-list me-2"></i><span id="orgTitle">Org Activity</span></div>
+      <button id="orgCloseBtn" class="btn-icon" aria-label="Close"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="p-3">
+      <div class="d-flex align-items-center gap-3">
+        <div class="chip" id="orgChipStatus">Status — </div>
+        <div class="chip" id="orgChipUptime">Uptime — </div>
+        <div class="chip" id="orgChipRisk">Risk — </div>
+      </div>
+      <div id="orgActivityList" class="mt-3"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PERMISSION SEND MODAL (Approve flow) -->
+<div id="permModalBack" class="modal-back"></div>
+<div id="permModal" class="modal-wrap" role="dialog" aria-modal="true" aria-labelledby="permTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="title fw-bold"><i class="fa fa-envelope-open-text me-2"></i><span id="permTitle">Grant Permission</span></div>
+      <button id="permCloseBtn" class="btn-icon" aria-label="Close"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="p-3">
+      <form id="permForm">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small-muted">Organization</label>
+            <input id="permOrg" class="form-control form-control-sm" disabled />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small-muted">Subject</label>
+            <input id="permSubject" class="form-control form-control-sm" value="Server Activation & Access" />
+          </div>
+          <div class="col-md-12">
+            <label class="form-label small-muted">Activation Link</label>
+            <input id="permLink" class="form-control form-control-sm"/>
+          </div>
+          <div class="col-md-12">
+            <label class="form-label small-muted">Message</label>
+            <textarea id="permMsg" class="form-control" rows="6" placeholder="Approval message…"></textarea>
+          </div>
+          <div class="col-12 d-flex justify-content-end gap-2">
+            <button id="btnPermAIDraft" type="button" class="btn btn-ghost btn-sm"><i class="fa fa-wand-magic-sparkles me-1"></i>AI Draft</button>
+            <button type="submit" class="btn btn-accent btn-sm"><i class="fa fa-paper-plane me-1"></i>Send & Approve</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+// =========================
+//   DATA & STORAGE KEYS
+// =========================
+const STORAGE_KEYS = {
+  ORGS: 'ziyara_orgs',
+  LOGS: 'owner_logs',
+  REQS: 'ziyara_requests',
+  USER: 'ziyara_owner',
+  API:  'gemini_api_key',
+  EJP:  'emailjs_public',
+  EJS:  'emailjs_service',
+  EJT:  'emailjs_template'
+};
+
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent';
+
+// Seed data
+const DEFAULT_ORGS = [
+  { id:'srv-1001', name:'CloudLabs', status:'online', uptime:'99.3%', risk:'low',
+    activity:[
+      { ts:'2025-10-28T09:14:00Z', text:'Backup completed (37 GB)' },
+      { ts:'2025-10-29T03:20:00Z', text:'New event published: Cloud Workshop' },
+      { ts:'2025-11-01T10:01:00Z', text:'Traffic spike handled (1.7x baseline)' }
+    ],
+    loads:[52,48,63,40,37,58,61,72,44,51,66,70,39,55]
+  },
+  { id:'srv-1002', name:'NetworkOps', status:'offline', uptime:'95.1%', risk:'med',
+    activity:[
+      { ts:'2025-10-24T11:42:00Z', text:'Auth service restart' },
+      { ts:'2025-10-31T14:33:00Z', text:'Server entered maintenance mode' }
+    ],
+    loads:[23,18,30,22,19,25,41,35,20,18,24,29,26,22]
+  },
+  { id:'srv-1003', name:'EduVerse', status:'online', uptime:'98.2%', risk:'low',
+    activity:[
+      { ts:'2025-10-27T08:12:00Z', text:'Event edited: Orientation Day' },
+      { ts:'2025-10-30T17:09:00Z', text:'New staff onboarded: 2 accounts' }
+    ],
+    loads:[31,29,40,36,38,34,45,47,44,52,49,43,41,39]
+  }
+];
+
+const DEFAULT_REQUESTS = [
+  { id:1, org:'NewWave Tech', email:'ops@newwave.example', reason:'Requesting activation & server namespace', status:'pending', time:'1h ago' },
+  { id:2, org:'GreenStack', email:'admin@greenstack.example', reason:'Need permission to start org server', status:'pending', time:'3h ago' }
+];
+
+// =========================
+//   HELPERS
+// =========================
+const el = s => document.querySelector(s);
+const els = s => Array.from(document.querySelectorAll(s));
+const nowIso = () => new Date().toISOString();
+function toast(msg){
+  const node=document.createElement('div');
+  node.textContent=msg;
+  Object.assign(node.style,{position:'fixed',right:'18px',bottom:'18px',padding:'10px 14px',background:'rgba(0,0,0,0.75)',color:'#fff',borderRadius:'10px',zIndex:99999,transition:'opacity .5s'});
+  document.body.appendChild(node);
+  setTimeout(()=>node.style.opacity='0',1600);
+  setTimeout(()=>node.remove(),2200);
+}
+function loadJSON(key, fb){ try{const raw=localStorage.getItem(key); return raw? JSON.parse(raw): structuredClone(fb);}catch{return structuredClone(fb);} }
+function saveJSON(key, v){ localStorage.setItem(key, JSON.stringify(v)); }
+function pruneLogs30d(){
+  const logs = loadJSON(STORAGE_KEYS.LOGS, []);
+  const cutoff = Date.now() - 30*24*60*60*1000;
+  const kept = logs.filter(l=> new Date(l.ts).getTime() >= cutoff);
+  saveJSON(STORAGE_KEYS.LOGS, kept);
+  return kept;
+}
+function logOwner(action, detail){
+  const logs = pruneLogs30d();
+  logs.unshift({ ts: nowIso(), action, detail });
+  saveJSON(STORAGE_KEYS.LOGS, logs);
+  renderStatsAndOverview();
+}
+
+// =========================
+//   USER INIT
+// =========================
+const fallbackOwner = { displayName:'Owner', email:'owner@ziyara' };
+function initOwner(){
+  const u = loadJSON(STORAGE_KEYS.USER, fallbackOwner);
+  el('#sidebarName').textContent = u.displayName;
+  el('#sidebarEmail').textContent = u.email;
+  el('#sidebarSignedEmail').textContent = u.email;
+  el('#welcomeTitle').textContent = `Welcome back, ${u.displayName}`;
+  el('#inputName').value = u.displayName;
+  el('#inputEmail').value = u.email;
+  el('#sidebarAvatar').textContent = (u.displayName||'OW').split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+  // load keys into settings
+  el('#inputGemini').value = localStorage.getItem(STORAGE_KEYS.API)||'';
+  el('#inputEjp').value   = localStorage.getItem(STORAGE_KEYS.EJP)||'';
+  el('#inputEjs').value   = localStorage.getItem(STORAGE_KEYS.EJS)||'';
+  el('#inputEjt').value   = localStorage.getItem(STORAGE_KEYS.EJT)||'';
+}
+
+// =========================
+//   ORGS / REQUESTS ACCESSORS
+// =========================
+function getOrgs(){ return loadJSON(STORAGE_KEYS.ORGS, DEFAULT_ORGS); }
+function setOrgs(v){ saveJSON(STORAGE_KEYS.ORGS, v); }
+function getReqs(){ return loadJSON(STORAGE_KEYS.REQS, DEFAULT_REQUESTS); }
+function setReqs(v){ saveJSON(STORAGE_KEYS.REQS, v); }
+
+// =========================
+//   OVERVIEW & STATS
+// =========================
+function calcAvgRiskLabel(orgs){
+  const score = orgs.reduce((acc,o)=> acc + (o.risk==='high'?3: o.risk==='med'?2:1), 0) / Math.max(orgs.length,1);
+  if(score>=2.5) return 'High';
+  if(score>=1.7) return 'Med';
+  return 'Low';
+}
+function renderStatsAndOverview(){
+  const orgs=getOrgs();
+  const total=orgs.length;
+  const online=orgs.filter(o=>o.status==='online').length;
+  const offline=total-online;
+  const logs=loadJSON(STORAGE_KEYS.LOGS, []);
+
+  el('#statTotalOrgs').textContent = total;
+  el('#statOnline').textContent = online;
+  // AI load index derived from synthetic load avg (from AI page)
+  const idx = Math.round((window.syntheticLoads?.reduce((a,b)=>a+b,0)/Math.max(window.syntheticLoads?.length||1,1))||0);
+  el('#statAiIndex').textContent = isFinite(idx)? idx : '—';
+  el('#statAvgRisk').textContent = calcAvgRiskLabel(orgs);
+
+  // overview feed: last 6 logs
+  const feed=el('#overviewFeed'); feed.innerHTML='';
+  if(logs.length===0){ feed.innerHTML='<div class="muted">No recent events.</div>'; }
+  else logs.slice(0,6).forEach(l=>{
+    const d=document.createElement('div'); d.className='list-item';
+    d.innerHTML=`<div><div style="font-weight:700">${l.action}</div><div class="muted">${new Date(l.ts).toLocaleString()}</div></div><div class="small-muted">${l.detail||''}</div>`;
+    feed.appendChild(d);
+  });
+
+  // quick health list
+  const box=el('#quickHealth'); box.innerHTML='';
+  orgs.forEach(o=>{
+    const div=document.createElement('div');
+    const riskClass = o.risk==='high'?'risk-high':(o.risk==='med'?'risk-med':'risk-low');
+    div.className='d-flex align-items-center justify-content-between list-item';
+    div.innerHTML=`<div><div style="font-weight:700">${o.name}</div><div class="small-muted">${o.id} • Uptime ${o.uptime}</div></div><div class="${riskClass}" style="font-weight:700;text-transform:uppercase">${o.risk}</div>`;
+    box.appendChild(div);
+  });
+}
+
+// =========================
+//   ORG TABLE
+// =========================
+function renderOrgTable(){
+  const body = el('#orgTableBody'); body.innerHTML='';
+  const orgs=getOrgs();
+  orgs.forEach(o=>{
+    const tr=document.createElement('tr');
+    const riskClass = o.risk==='high'?'risk-high':(o.risk==='med'?'risk-med':'risk-low');
+    const statusBadge = o.status==='online' ? '<span class="badge-soft">Online</span>' : '<span class="badge-soft" style="color:#e67e22;background:rgba(230,126,34,0.15)">Offline</span>';
+    tr.innerHTML = `
+      <td><div style="font-weight:700">${o.name}</div><div class="small-muted">${o.name.toLowerCase()}.org</div></td>
+      <td>${o.id}</td>
+      <td>${statusBadge}</td>
+      <td>${o.uptime}</td>
+      <td class="${riskClass}" style="text-transform:uppercase;font-weight:700">${o.risk}</td>
+      <td class="text-end">
+        <div class="btn-group">
+          <button class="btn btn-sm btn-accent" data-act="toggle" data-id="${o.id}">${o.status==='online'?'Go Offline':'Go Online'}</button>
+          <button class="btn btn-sm btn-ghost" data-act="activity" data-id="${o.id}"><i class="fa fa-eye me-1"></i>View</button>
+        </div>
+      </td>`;
+    body.appendChild(tr);
+  });
+
+  body.querySelectorAll('button[data-act="toggle"]').forEach(btn=> btn.addEventListener('click', ()=> toggleServer(btn.getAttribute('data-id'))));
+  body.querySelectorAll('button[data-act="activity"]').forEach(btn=> btn.addEventListener('click', ()=> openOrgModal(btn.getAttribute('data-id'))));
+}
+
+function toggleServer(id){
+  const orgs=getOrgs(); const o=orgs.find(x=>x.id===id); if(!o) return;
+  o.status = (o.status==='online'?'offline':'online');
+  setOrgs(orgs);
+  logOwner('Toggle Server', `${o.name} is now ${o.status}`);
+  renderOrgTable();
+}
+
+function recalcHealth(){
+  const orgs=getOrgs();
+  orgs.forEach(o=>{
+    const recent = o.loads?.slice(-5) || [30,40,50];
+    const avg = recent.reduce((a,b)=>a+b,0)/recent.length;
+    let risk='low';
+    if(avg>65 || o.status==='offline') risk='high'; else if(avg>45) risk='med';
+    o.risk=risk;
+  });
+  setOrgs(orgs); renderStatsAndOverview(); renderOrgTable();
+  toast('Health recalculated');
+}
+
+// =========================
+//   ORG MODAL
+// =========================
+const orgModalBack = el('#orgModalBack');
+const orgModal = el('#orgModal');
+function openOrgModal(id){
+  const orgs=getOrgs(); const o=orgs.find(x=>x.id===id); if(!o) return;
+  el('#orgTitle').textContent = `${o.name} — Activity`;
+  el('#orgChipStatus').textContent = `Status — ${o.status.toUpperCase()}`;
+  el('#orgChipUptime').textContent = `Uptime — ${o.uptime}`;
+  el('#orgChipRisk').textContent = `Risk — ${o.risk.toUpperCase()}`;
+  const area=el('#orgActivityList'); area.innerHTML='';
+  (o.activity||[]).slice().reverse().forEach(a=>{
+    const d=document.createElement('div'); d.className='list-item';
+    d.innerHTML=`<div><div style="font-weight:700">${a.text}</div><div class="muted">${new Date(a.ts).toLocaleString()}</div></div><div class="chip">ORG</div>`;
+    area.appendChild(d);
+  });
+  orgModalBack.style.display='block'; orgModal.style.display='flex';
+}
+function closeOrgModal(){ orgModalBack.style.display='none'; orgModal.style.display='none'; }
+
+el('#orgCloseBtn').addEventListener('click', closeOrgModal);
+orgModalBack.addEventListener('click', closeOrgModal);
+
+// =========================
+//   REQUESTS & PERMISSIONS (Unified)
+// =========================
+function renderRequests(){
+  const area=el('#requestsArea'); area.innerHTML='';
+  const reqs=getReqs();
+  if(reqs.length===0){ area.innerHTML='<div class="muted">No incoming requests.</div>'; return; }
+  reqs.forEach(r=>{
+    const row=document.createElement('div'); row.className='list-item';
+    row.innerHTML=`
+      <div>
+        <div style="font-weight:700">${r.org}</div>
+        <div class="muted">${r.email} • ${r.reason}</div>
+        <div class="small-muted">${r.time}</div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="chip">${r.status.toUpperCase()}</span>
+        ${r.status==='pending' ? `
+          <button class="btn btn-sm btn-accent" data-act="grant" data-id="${r.id}">Grant Permission</button>
+          <button class="btn btn-sm btn-ghost" data-act="reject" data-id="${r.id}">Reject</button>` :
+          `<button class="btn btn-sm btn-ghost" data-act="reset" data-id="${r.id}">Reset</button>`}
+      </div>`;
+    area.appendChild(row);
+  });
+  area.querySelectorAll('button[data-act]').forEach(btn=> btn.addEventListener('click', ()=> handleRequestAction(btn)));
+}
+
+function handleRequestAction(btn){
+  const id=+btn.getAttribute('data-id');
+  const act=btn.getAttribute('data-act');
+  const reqs=getReqs();
+  const idx=reqs.findIndex(x=>x.id===id); if(idx<0) return;
+  const r=reqs[idx];
+  if(act==='reject'){ r.status='rejected'; setReqs(reqs); logOwner('Request Rejected', r.org); renderRequests(); toast('Rejected'); return; }
+  if(act==='reset'){ r.status='pending'; setReqs(reqs); renderRequests(); toast('Reset'); return; }
+  if(act==='grant'){
+    openPermissionModal(r);
+  }
+}
+
+// Permission modal & email send
+const permModalBack = el('#permModalBack');
+const permModal = el('#permModal');
+let currentPermReq = null;
+
+function generateActivationLink(orgName){
+  const token = btoa(`${orgName}|${Date.now()}`).replace(/=/g,'');
+  return `https://start.ziyara.org/activate?token=${token}`;
+}
+
+function openPermissionModal(req){
+  currentPermReq = req;
+  el('#permOrg').value = `${req.org} <${req.email}>`;
+  el('#permSubject').value = 'Server Activation & Access';
+  el('#permLink').value = generateActivationLink(req.org);
+  el('#permMsg').value = `Dear ${req.org},\n\nYour request has been approved. Please use the following link to activate and start your organization server:\n${el('#permLink').value}\n\nNext steps:\n• Sign in with your org admin account\n• Configure namespace and secrets\n• Start core services\n\nRegards,\nZiyara Owner`;
+  permModalBack.style.display='block'; permModal.style.display='flex';
+}
+function closePermissionModal(){ permModalBack.style.display='none'; permModal.style.display='none'; currentPermReq=null; }
+
+el('#permCloseBtn').addEventListener('click', closePermissionModal);
+permModalBack.addEventListener('click', closePermissionModal);
+
+// AI draft for permission email
+function getApiKey(){ return localStorage.getItem(STORAGE_KEYS.API)||''; }
+function saveApiKey(k){ localStorage.setItem(STORAGE_KEYS.API, k.trim()); }
+async function geminiComplete(promptText){
+  const key=getApiKey(); if(!key) throw new Error('Gemini API key not set (Settings)');
+  const body={ contents:[ { role:'user', parts:[{ text: promptText }] } ] };
+  const res=await fetch(GEMINI_ENDPOINT+'?key='+encodeURIComponent(key),{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+  if(!res.ok){ throw new Error('Gemini API error: '+res.status+' '+(await res.text().catch(()=>''))); }
+  const data=await res.json();
+  return data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('') || 'No response.';
+}
+
+el('#btnPermAIDraft').addEventListener('click', async ()=>{
+  if(!currentPermReq) return;
+  const link=el('#permLink').value||'(link)';
+  const prompt=`Draft a concise, friendly approval email for an organization. Confirm approval, include their activation link, and list 3 bullet next steps. Sign off as "Ziyara Owner".\nOrg: ${currentPermReq.org}\nEmail: ${currentPermReq.email}\nReason: ${currentPermReq.reason}\nLink: ${link}`;
+  try{
+    el('#btnPermAIDraft').disabled=true; el('#btnPermAIDraft').innerHTML='<i class="fa fa-spinner fa-spin me-1"></i>Drafting';
+    const text=await geminiComplete(prompt);
+    el('#permMsg').value = text;
+    toast('AI draft ready');
+  }catch(e){ toast('AI draft failed: '+e.message); }
+  finally{ el('#btnPermAIDraft').disabled=false; el('#btnPermAIDraft').innerHTML='<i class="fa fa-wand-magic-sparkles me-1"></i>AI Draft'; }
+});
+
+function emailjsConfigOk(){
+  return !!(localStorage.getItem(STORAGE_KEYS.EJP) && localStorage.getItem(STORAGE_KEYS.EJS) && localStorage.getItem(STORAGE_KEYS.EJT));
+}
+function initEmailJS(){
+  if(window.emailjs){
+    const pub = localStorage.getItem(STORAGE_KEYS.EJP)||'';
+    if(pub){ emailjs.init({ publicKey: pub }); }
+  }
+}
+
+el('#permForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  if(!currentPermReq) return;
+  if(!window.emailjs){ alert('EmailJS library not loaded'); return; }
+  if(!emailjsConfigOk()){ alert('Configure EmailJS keys in Settings first.'); return; }
+
+  const service = localStorage.getItem(STORAGE_KEYS.EJS);
+  const template= localStorage.getItem(STORAGE_KEYS.EJT);
+  const subject = el('#permSubject').value.trim();
+  const message = el('#permMsg').value.trim();
+  const link    = el('#permLink').value.trim();
+
+  try{
+    await emailjs.send(service, template, {
+      org_name: currentPermReq.org,
+      to_email: currentPermReq.email,
+      subject,
+      message,
+      link
+    });
+    toast('Permission email sent');
+    // mark request approved
+    const reqs=getReqs(); const idx=reqs.findIndex(x=>x.id===currentPermReq.id); if(idx>=0){ reqs[idx].status='approved'; setReqs(reqs); }
+    // ensure org exists in orgs list
+    const orgs=getOrgs();
+    if(!orgs.some(o=>o.name===currentPermReq.org)){
+      const newid='srv-'+Math.floor(Math.random()*9000+1000);
+      orgs.push({ id:newid, name:currentPermReq.org, status:'offline', uptime:'—', risk:'med', activity:[{ts:nowIso(), text:'Org approved, waiting activation'}], loads:[20,25,30,28,26,22,24,21,29,27,23,25,24,26]});
+      setOrgs(orgs);
+    }
+    logOwner('Permission Granted', `${currentPermReq.org}`);
+    renderRequests(); renderOrgTable(); renderStatsAndOverview();
+    closePermissionModal();
+  }catch(err){ console.error(err); toast('Email send failed'); }
+});
+
+// Mock new request button
+el('#btnSeedRequest').addEventListener('click', ()=>{
+  const reqs=getReqs();
+  const id=Math.max(0,...reqs.map(r=>r.id))+1;
+  reqs.unshift({ id, org:'NovaEdge', email:'ops@novaedge.example', reason:'Start server & namespace', status:'pending', time:'just now' });
+  setReqs(reqs); renderRequests(); toast('Mock request added');
+});
+
+// =========================
+//   AI LOAD & STATS
+// =========================
+window.syntheticLoads = [];
+function simulateLoad(){
+  window.syntheticLoads = Array.from({length:14}, ()=> Math.max(0, Math.min(100, Math.round(60 + (Math.random()*40 - 20)))));
+  drawLoad(); renderStatsAndOverview();
+}
+function drawLoad(){
+  const wrap=el('#loadBars'); if(!wrap) return; wrap.innerHTML='';
+  const arr=window.syntheticLoads; if(!arr.length) return;
+  arr.forEach((v,i)=>{
+    const row=document.createElement('div'); row.className='d-flex align-items-center gap-2 mb-2';
+    const label=document.createElement('div'); label.className='small-muted'; label.style.width='44px'; label.textContent=String(i+1).padStart(2,'0');
+    const bar=document.createElement('div'); bar.className='meter flex-grow-1';
+    const fill=document.createElement('div'); fill.style.width=v+'%'; bar.appendChild(fill);
+    const val=document.createElement('div'); val.className='small-muted'; val.style.width='38px'; val.textContent=v;
+    row.append(label, bar, val); wrap.appendChild(row);
+  });
+  const avg=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
+  el('#avgBar').style.width = avg+'%'; el('#avgVal').textContent=avg+' / 100';
+}
+
+el('#btnSimulateLoad').addEventListener('click', ()=>{ simulateLoad(); toast('Load simulated'); });
+
+el('#btnGenForecast').addEventListener('click', async ()=>{
+  try{
+    if(!window.syntheticLoads.length) simulateLoad();
+    const orgs=getOrgs();
+    const prompt=`You are an infrastructure assistant. Given these loads (0-100) for the last 14 intervals and org contexts, produce:\n1) A short forecast about the next 2-3 intervals,\n2) 3 concise recommendations to balance load (scale/cache/off-peak),\n3) Identify any at-risk org by name.\n\nLoads: ${window.syntheticLoads.join(', ')}\n\nOrgs:\n${orgs.map(o=>`${o.name} (${o.id}): status=${o.status}, risk=${o.risk}, uptime=${o.uptime}`).join('\n')}`;
+    el('#aiForecast').textContent='Generating AI forecast…';
+    const out=await geminiComplete(prompt);
+    el('#aiForecast').textContent=out;
+    const recs=(out.match(/(?:^|\n)[\-\*•]\s+(.+)/g)||[]).map(x=>x.replace(/^[\-\*•]\s+/,''));
+    const ul=el('#aiRecs'); ul.innerHTML=''; recs.slice(0,5).forEach(r=>{ const li=document.createElement('li'); li.textContent=r; ul.appendChild(li); });
+    logOwner('AI Load Forecast','Predicted upcoming load');
+  }catch(e){ el('#aiForecast').textContent='Forecast failed: '+e.message; }
+});
+
+// =========================
+//   OVERVIEW QUICK ACTIONS
+// =========================
+el('#btnQuickInsights').addEventListener('click', async ()=>{
+  try{
+    const orgs=getOrgs();
+    const prompt=`Provide a weekly summary (4-6 bullet lines) for a system owner across multiple organizations. Use status, uptime, and risk. One closing recommendation.\n\n${orgs.map(o=>`ORG: ${o.name} (${o.id})\nStatus: ${o.status}, Uptime: ${o.uptime}, Risk: ${o.risk}`).join('\n\n')}`;
+    el('#aiWeekly').textContent='Generating…';
+    const out=await geminiComplete(prompt);
+    el('#aiWeekly').textContent=out; logOwner('AI Weekly Summary','Generated');
+  }catch(e){ el('#aiWeekly').textContent='Failed: '+e.message; }
+});
+
+el('#btnMaintenance').addEventListener('click', ()=>{
+  logOwner('Maintenance Mode','Owner initiated maintenance sweep');
+  toast('Maintenance action recorded');
+});
+
+el('#btnAllOffline').addEventListener('click', ()=>{
+  const orgs=getOrgs(); const anyOnline=orgs.some(o=>o.status==='online');
+  orgs.forEach(o=> o.status = anyOnline ? 'offline' : 'online');
+  setOrgs(orgs); renderOrgTable(); renderStatsAndOverview();
+  logOwner(anyOnline? 'All Servers Offline':'All Servers Online', 'Bulk toggle');
+});
+
+// =========================
+//   SEARCH
+// =========================
+el('#globalSearch').addEventListener('input', (e)=>{
+  const q=e.target.value.toLowerCase().trim();
+  if(el('#page-org-servers').classList.contains('active')){
+    Array.from(el('#orgTableBody').children).forEach(tr=> tr.style.display = tr.textContent.toLowerCase().includes(q)?'':'none');
+  }
+  if(el('#page-requests').classList.contains('active')){
+    Array.from(el('#requestsArea').children).forEach(div=> div.style.display = div.textContent.toLowerCase().includes(q)?'':'none');
+  }
+});
+
+// =========================
+//   NAVIGATION
+// =========================
+function activatePage(pageId){
+  els('.nav-item').forEach(n=> n.classList.toggle('active', n.getAttribute('data-page')===pageId));
+  ['overview','org-servers','requests','activity','ai-load','settings'].forEach(p=>{
+    const node=el('#page-'+p); if(node) node.classList.toggle('active', p===pageId);
+  });
+  if(pageId==='org-servers') renderOrgTable();
+  if(pageId==='requests') renderRequests();
+  if(pageId==='activity') renderLogs();
+}
+els('.nav-item').forEach(n=> n.addEventListener('click', ()=> activatePage(n.getAttribute('data-page'))));
+el('[data-action="go-settings"]').addEventListener('click', (e)=>{ e.preventDefault(); activatePage('settings'); });
+
+// =========================
+//   ACTIVITY LOG PAGE
+// =========================
+function renderLogs(){
+  const area=el('#activityList'); area.innerHTML='';
+  const logs=loadJSON(STORAGE_KEYS.LOGS, []);
+  if(!logs.length){ area.innerHTML='<div class="muted">No activity yet.</div>'; return; }
+  logs.forEach(l=>{
+    const d=document.createElement('div'); d.className='list-item';
+    d.innerHTML=`<div><div style="font-weight:700">${l.action}</div><div class="muted">${new Date(l.ts).toLocaleString()}</div></div><div class="small-muted">${l.detail||''}</div>`;
+    area.appendChild(d);
+  });
+}
+
+el('#btnClearOld').addEventListener('click', ()=>{ pruneLogs30d(); renderLogs(); toast('Old logs cleared'); });
+el('#btnClearAllLogs').addEventListener('click', ()=>{ if(!confirm('Clear all logs?')) return; saveJSON(STORAGE_KEYS.LOGS, []); renderLogs(); toast('All logs cleared'); });
+
+// =========================
+//   SETTINGS / THEME / AUTH
+// =========================
+el('#settingsForm').addEventListener('submit', (e)=> e.preventDefault());
+
+el('#btnSaveGemini').addEventListener('click', ()=>{ const k=el('#inputGemini').value.trim(); if(!k){alert('Paste a valid Gemini key'); return;} localStorage.setItem(STORAGE_KEYS.API, k); toast('Gemini key saved'); });
+
+el('#btnSaveEmailJS').addEventListener('click', ()=>{
+  localStorage.setItem(STORAGE_KEYS.EJP, el('#inputEjp').value.trim());
+  localStorage.setItem(STORAGE_KEYS.EJS, el('#inputEjs').value.trim());
+  localStorage.setItem(STORAGE_KEYS.EJT, el('#inputEjt').value.trim());
+  initEmailJS(); toast('EmailJS keys saved');
+});
+
+document.getElementById('settingsForm').addEventListener('submit', ()=>{});
+
+document.getElementById('inputName').addEventListener('change', ()=>{
+  const displayName=el('#inputName').value.trim(); const email=el('#inputEmail').value.trim();
+  saveJSON(STORAGE_KEYS.USER, { displayName, email }); initOwner(); toast('Profile saved'); logOwner('Profile Updated', email);
+});
+
+document.getElementById('inputEmail').addEventListener('change', ()=>{
+  const displayName=el('#inputName').value.trim(); const email=el('#inputEmail').value.trim();
+  saveJSON(STORAGE_KEYS.USER, { displayName, email }); initOwner(); toast('Profile saved'); logOwner('Profile Updated', email);
+});
+
+el('#resetProfile')?.addEventListener('click', ()=>{
+  const u=loadJSON(STORAGE_KEYS.USER, fallbackOwner);
+  el('#inputName').value=u.displayName; el('#inputEmail').value=u.email; toast('Reset profile fields');
+});
+
+el('#btnResetData').addEventListener('click', ()=>{
+  if(!confirm('Clear all local data (orgs, logs, requests, keys)?')) return;
+  localStorage.removeItem(STORAGE_KEYS.ORGS);
+  localStorage.removeItem(STORAGE_KEYS.LOGS);
+  localStorage.removeItem(STORAGE_KEYS.REQS);
+  localStorage.removeItem(STORAGE_KEYS.API);
+  localStorage.removeItem(STORAGE_KEYS.EJP);
+  localStorage.removeItem(STORAGE_KEYS.EJS);
+  localStorage.removeItem(STORAGE_KEYS.EJT);
+  toast('All data cleared');
+  logOwner('Data Cleared','localStorage reset');
+  firstBoot();
+});
+
+el('#themeBtn').addEventListener('click', ()=>{
+  document.body.classList.toggle('light-theme');
+  el('#themeBtn').innerHTML = document.body.classList.contains('light-theme') ? '<i class="fa fa-moon me-2"></i>Dark' : '<i class="fa fa-sun me-2"></i>Theme';
+});
+
+el('#logoutBtn').addEventListener('click', ()=>{ if(confirm('Sign out?')) window.location.href='newlog.html'; });
+el('#signOut').addEventListener('click', ()=> el('#logoutBtn').click());
+
+// =========================
+//   INIT
+// =========================
+function renderAll(){ initOwner(); renderStatsAndOverview(); }
+function firstBoot(){
+  if(!localStorage.getItem(STORAGE_KEYS.ORGS)) saveJSON(STORAGE_KEYS.ORGS, DEFAULT_ORGS);
+  if(!localStorage.getItem(STORAGE_KEYS.REQS)) saveJSON(STORAGE_KEYS.REQS, DEFAULT_REQUESTS);
+  pruneLogs30d();
+  simulateLoad();
+  initOwner();
+  renderStatsAndOverview();
+  activatePage('overview');
+}
+
+// Navigation wiring
+function bindNav(){ els('.nav-item').forEach(n=> n.addEventListener('click', ()=> activatePage(n.getAttribute('data-page')))); }
+
+// Boot
+firstBoot(); bindNav(); initEmailJS();
+
+</script>
+
+<!-- EmailJS (browser) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
